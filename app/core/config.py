@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     
     # Server settings
     host: str = Field(default="127.0.0.1", env="HOST")
-    port: int = Field(default=8080, env="PORT")
+    port: int = Field(default=8081, env="PORT")
     
     # Database settings
     database_path: str = Field(default="oauth_tokens.db", env="DATABASE_PATH")
@@ -30,7 +30,7 @@ class Settings(BaseSettings):
             "http://127.0.0.1:3000",
             "http://localhost:8000",
             "http://127.0.0.1:8000",
-            "http://127.0.0.1:8080"
+            "http://127.0.0.1:8081"
         ],
         env="CORS_ORIGINS"
     )
@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     google_client_id: Optional[str] = Field(default=None, env="GOOGLE_CLIENT_ID")
     google_client_secret: Optional[str] = Field(default=None, env="GOOGLE_CLIENT_SECRET")
     google_redirect_uri: str = Field(
-        default="http://127.0.0.1:8080/auth/google/callback",
+        default="http://127.0.0.1:8081/auth/google/callback",
         env="GOOGLE_REDIRECT_URI"
     )
     google_scopes: List[str] = Field(
@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     microsoft_client_id: Optional[str] = Field(default=None, env="MICROSOFT_CLIENT_ID")
     microsoft_client_secret: Optional[str] = Field(default=None, env="MICROSOFT_CLIENT_SECRET")
     microsoft_redirect_uri: str = Field(
-        default="http://127.0.0.1:8080/auth/microsoft/callback",
+        default="http://127.0.0.1:8081/auth/microsoft/callback",
         env="MICROSOFT_REDIRECT_URI"
     )
     
@@ -62,16 +62,33 @@ class Settings(BaseSettings):
     atlassian_client_id: Optional[str] = Field(default=None, env="ATLASSIAN_CLIENT_ID")
     atlassian_client_secret: Optional[str] = Field(default=None, env="ATLASSIAN_CLIENT_SECRET")
     atlassian_redirect_uri: str = Field(
-        default="http://127.0.0.1:8080/auth/atlassian/callback",
+        default="http://127.0.0.1:8081/auth/atlassian/callback",
         env="ATLASSIAN_REDIRECT_URI"
+    )
+    atlassian_scopes: List[str] = Field(
+        default=[
+            "read:jira-work",
+            "read:jira-user",
+            "read:me"
+        ],
+        env="ATLASSIAN_SCOPES"
     )
     
     # Slack OAuth settings (for future use)
     slack_client_id: Optional[str] = Field(default=None, env="SLACK_CLIENT_ID")
     slack_client_secret: Optional[str] = Field(default=None, env="SLACK_CLIENT_SECRET")
     slack_redirect_uri: str = Field(
-        default="http://127.0.0.1:8080/auth/slack/callback",
+        default="http://127.0.0.1:8081/auth/slack/callback",
         env="SLACK_REDIRECT_URI"
+    )
+    slack_scopes: List[str] = Field(
+        default=[
+            "channels:read",
+            "channels:history",
+            "users:read",
+            "users:read.email"
+        ],
+        env="SLACK_SCOPES"
     )
     
     # Security settings

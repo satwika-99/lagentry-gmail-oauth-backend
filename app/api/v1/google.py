@@ -1,295 +1,410 @@
 """
-Google API endpoints for v1
+Google API Endpoints
+Handles all Google service operations (Gmail, Drive, Calendar, etc.)
 """
 
-import httpx
-from fastapi import APIRouter, HTTPException, Query
-from typing import List, Dict, Any, Optional
+from fastapi import APIRouter, HTTPException, Depends, Query, Path
+from typing import Optional, List, Dict, Any
+from datetime import datetime
 
 from ...providers.google.gmail import gmail_service
-from ...core.utils import create_success_response, create_error_response
+from ...providers.google.drive import drive_api
+from ...providers.google.calendar import calendar_api
+from ...core.database import db_manager
+from ...core.exceptions import APIError, TokenError
+from ...schemas.google import (
+    EmailListResponse, EmailResponse, LabelResponse, ProfileResponse,
+    DriveFileListResponse, DriveFileResponse, DriveSearchResponse,
+    CalendarListResponse, EventListResponse, EventResponse, EventCreateRequest
+)
 
-router = APIRouter(prefix="/google", tags=["Google"])
+router = APIRouter(prefix="/google", tags=["Google Services"])
 
 
-@router.get("/gmail/emails")
-async def get_gmail_emails(
-    user_email: str = Query(..., description="User email address"),
-    max_results: int = Query(10, description="Maximum number of emails to fetch"),
-    query: Optional[str] = Query(None, description="Gmail search query")
+# Gmail Endpoints
+@router.get("/gmail/emails", response_model=EmailListResponse)
+async def get_emails(
+    user_email: str = Query(..., description="User email"),
+    max_results: int = Query(50, description="Maximum number of emails to return"),
+    query: Optional[str] = Query(None, description="Search query"),
+    label_ids: Optional[List[str]] = Query(None, description="Label IDs to filter by"),
+    include_spam_trash: bool = Query(False, description="Include spam and trash")
 ):
-    """Get Gmail emails for a user"""
+    """Get emails from Gmail"""
     try:
-        result = await gmail_service.get_user_emails(user_email, max_results, query)
-        return result
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch emails: {str(e)}")
-
-
-@router.get("/gmail/search")
-async def search_gmail_emails(
-    user_email: str = Query(..., description="User email address"),
-    query: str = Query(..., description="Gmail search query"),
-    max_results: int = Query(10, description="Maximum number of emails to fetch")
-):
-    """Search Gmail emails for a user"""
-    try:
-        result = await gmail_service.search_user_emails(user_email, query, max_results)
-        return result
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to search emails: {str(e)}")
-
-
-@router.get("/gmail/labels")
-async def get_gmail_labels(
-    user_email: str = Query(..., description="User email address")
-):
-    """Get Gmail labels for a user"""
-    try:
-        result = await gmail_service.get_user_labels(user_email)
-        return result
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch labels: {str(e)}")
-
-
-@router.get("/gmail/profile")
-async def get_gmail_profile(
-    user_email: str = Query(..., description="User email address")
-):
-    """Get Gmail profile for a user"""
-    try:
-        result = await gmail_service.get_user_profile(user_email)
-        return result
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch profile: {str(e)}")
-
-
-@router.get("/gmail/message/{message_id}")
-async def get_gmail_message(
-    message_id: str,
-    user_email: str = Query(..., description="User email address")
-):
-    """Get specific Gmail message"""
-    try:
-        # Get valid tokens
-        from ...core.database import db_manager
-        tokens = db_manager.get_valid_tokens(user_email, "google")
-        if not tokens:
-            raise HTTPException(status_code=404, detail="No valid tokens found for user")
-        
-        # Create Gmail API client
-        from ...providers.google.gmail import GmailAPI
-        gmail_api = GmailAPI(tokens["access_token"])
-        
-        # Get message
-        message = await gmail_api.get_message_detail(message_id)
-        if not message:
-            raise HTTPException(status_code=404, detail="Message not found")
-        
-        # Log activity
-        db_manager.log_activity(
-            user_email, 
-            "fetch_message", 
-            {"message_id": message_id}
+        messages = await gmail_service.get_messages(
+            user_email=user_email,
+            max_results=max_results,
+            query=query,
+            label_ids=label_ids,
+            include_spam_trash=include_spam_trash
         )
-        
-        return create_success_response({
-            "message": message,
-            "user_email": user_email
-        })
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch message: {str(e)}")
-
-
-@router.get("/gmail/thread/{thread_id}")
-async def get_gmail_thread(
-    thread_id: str,
-    user_email: str = Query(..., description="User email address")
-):
-    """Get Gmail thread messages"""
-    try:
-        # Get valid tokens
-        from ...core.database import db_manager
-        tokens = db_manager.get_valid_tokens(user_email, "google")
-        if not tokens:
-            raise HTTPException(status_code=404, detail="No valid tokens found for user")
-        
-        # Create Gmail API client
-        from ...providers.google.gmail import GmailAPI
-        gmail_api = GmailAPI(tokens["access_token"])
-        
-        # Get thread messages
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{gmail_api.base_url}/threads/{thread_id}",
-                headers=gmail_api.headers
-            )
-            
-            if response.status_code != 200:
-                raise HTTPException(status_code=404, detail="Thread not found")
-            
-            thread_data = response.json()
-            messages = []
-            
-            for message in thread_data.get("messages", []):
-                message_detail = await gmail_api._get_message_detail(message["id"])
-                if message_detail:
-                    messages.append(message_detail)
-        
-        # Log activity
-        db_manager.log_activity(
-            user_email, 
-            "fetch_thread", 
-            {"thread_id": thread_id, "message_count": len(messages)}
+        return EmailListResponse(
+            success=True,
+            messages=messages.get("messages", []),
+            total=len(messages.get("messages", [])),
+            query=query
         )
-        
-        return create_success_response({
-            "thread_id": thread_id,
-            "messages": messages,
-            "count": len(messages),
-            "user_email": user_email
-        })
-        
-    except HTTPException:
-        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch thread: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/gmail/stats")
-async def get_gmail_stats(
-    user_email: str = Query(..., description="User email address")
+@router.get("/gmail/emails/{message_id}", response_model=EmailResponse)
+async def get_email(
+    message_id: str = Path(..., description="Message ID"),
+    user_email: str = Query(..., description="User email"),
+    format: str = Query("full", description="Message format")
 ):
-    """Get Gmail statistics for a user"""
+    """Get a specific email by ID"""
     try:
-        # Get valid tokens
-        from ...core.database import db_manager
-        tokens = db_manager.get_valid_tokens(user_email, "google")
-        if not tokens:
-            raise HTTPException(status_code=404, detail="No valid tokens found for user")
-        
-        # Create Gmail API client
-        from ...providers.google.gmail import GmailAPI
-        gmail_api = GmailAPI(tokens["access_token"])
-        
-        # Get profile for stats
-        profile = await gmail_api.get_profile()
-        
-        # Get recent messages for count
-        messages = await gmail_api.get_messages(max_results=100)
-        
-        # Calculate stats
-        stats = {
-            "email_address": profile.get("emailAddress", ""),
-            "messages_total": profile.get("messagesTotal", 0),
-            "threads_total": profile.get("threadsTotal", 0),
-            "recent_messages": len(messages),
-            "history_id": profile.get("historyId", ""),
-            "user_email": user_email
-        }
-        
-        # Log activity
-        db_manager.log_activity(
-            user_email, 
-            "fetch_stats", 
-            {"messages_total": stats["messages_total"]}
+        message = await gmail_service.get_message(
+            user_email=user_email,
+            message_id=message_id,
+            format=format
         )
-        
-        return create_success_response(stats)
-        
+        return EmailResponse(
+            success=True,
+            message=message
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch stats: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/gmail/labels/{label_id}")
-async def get_gmail_label(
-    label_id: str,
-    user_email: str = Query(..., description="User email address")
+@router.get("/gmail/labels", response_model=LabelResponse)
+async def get_labels(user_email: str = Query(..., description="User email")):
+    """Get Gmail labels"""
+    try:
+        labels = await gmail_service.get_labels(user_email)
+        return LabelResponse(
+            success=True,
+            labels=labels.get("labels", [])
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/gmail/profile", response_model=ProfileResponse)
+async def get_profile(user_email: str = Query(..., description="User email")):
+    """Get Gmail user profile"""
+    try:
+        profile = await gmail_service.get_profile(user_email)
+        return ProfileResponse(
+            success=True,
+            profile=profile
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/gmail/send")
+async def send_email(
+    user_email: str = Query(..., description="User email"),
+    to: str = Query(..., description="Recipient email"),
+    subject: str = Query(..., description="Email subject"),
+    body: str = Query(..., description="Email body"),
+    cc: Optional[str] = Query(None, description="CC recipients"),
+    bcc: Optional[str] = Query(None, description="BCC recipients")
 ):
-    """Get specific Gmail label"""
+    """Send an email via Gmail"""
     try:
-        # Get valid tokens
-        from ...core.database import db_manager
-        tokens = db_manager.get_valid_tokens(user_email, "google")
-        if not tokens:
-            raise HTTPException(status_code=404, detail="No valid tokens found for user")
-        
-        # Create Gmail API client
-        from ...providers.google.gmail import GmailAPI
-        gmail_api = GmailAPI(tokens["access_token"])
-        
-        # Get label
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{gmail_api.base_url}/labels/{label_id}",
-                headers=gmail_api.headers
-            )
-            
-            if response.status_code != 200:
-                raise HTTPException(status_code=404, detail="Label not found")
-            
-            label_data = response.json()
-        
-        # Log activity
-        db_manager.log_activity(
-            user_email, 
-            "fetch_label", 
-            {"label_id": label_id, "label_name": label_data.get("name", "")}
+        # This would need to be implemented in the gmail service
+        result = await gmail_service.send_message(
+            user_email=user_email,
+            email_data={
+                "to": to,
+                "subject": subject,
+                "body": body,
+                "cc": cc,
+                "bcc": bcc
+            }
         )
-        
-        return create_success_response({
-            "label": label_data,
-            "user_email": user_email
-        })
-        
-    except HTTPException:
-        raise
+        return {"success": True, "message_id": result.get("id")}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch label: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/gmail/labels/{label_id}/messages")
-async def get_gmail_label_messages(
-    label_id: str,
-    user_email: str = Query(..., description="User email address"),
-    max_results: int = Query(10, description="Maximum number of messages to fetch")
+# Google Drive Endpoints
+@router.get("/drive/files", response_model=DriveFileListResponse)
+async def list_drive_files(
+    user_email: str = Query(..., description="User email"),
+    page_size: int = Query(50, description="Number of files to return"),
+    query: Optional[str] = Query(None, description="Search query"),
+    fields: Optional[str] = Query(None, description="Fields to return")
 ):
-    """Get messages from a specific Gmail label"""
+    """List files in Google Drive"""
     try:
-        # Get valid tokens
-        from ...core.database import db_manager
-        tokens = db_manager.get_valid_tokens(user_email, "google")
-        if not tokens:
-            raise HTTPException(status_code=404, detail="No valid tokens found for user")
-        
-        # Create Gmail API client
-        from ...providers.google.gmail import GmailAPI
-        gmail_api = GmailAPI(tokens["access_token"])
-        
-        # Get messages with label query
-        query = f"label:{label_id}"
-        messages = await gmail_api.get_messages(max_results, query)
-        
-        # Log activity
-        db_manager.log_activity(
-            user_email, 
-            "fetch_label_messages", 
-            {"label_id": label_id, "count": len(messages)}
+        files = await drive_api.list_files(
+            user_email=user_email,
+            page_size=page_size,
+            query=query,
+            fields=fields
         )
-        
-        return create_success_response({
-            "label_id": label_id,
-            "messages": messages,
-            "count": len(messages),
-            "user_email": user_email
-        })
-        
+        return DriveFileListResponse(
+            success=True,
+            files=files.get("files", []),
+            total=len(files.get("files", [])),
+            next_page_token=files.get("nextPageToken")
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch label messages: {str(e)}") 
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/drive/files/{file_id}", response_model=DriveFileResponse)
+async def get_drive_file(
+    file_id: str = Path(..., description="File ID"),
+    user_email: str = Query(..., description="User email"),
+    fields: Optional[str] = Query(None, description="Fields to return")
+):
+    """Get a specific file from Google Drive"""
+    try:
+        file_data = await drive_api.get_file(
+            user_email=user_email,
+            file_id=file_id,
+            fields=fields
+        )
+        return DriveFileResponse(
+            success=True,
+            file=file_data
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/drive/files/{file_id}/download")
+async def download_drive_file(
+    file_id: str = Path(..., description="File ID"),
+    user_email: str = Query(..., description="User email")
+):
+    """Download a file from Google Drive"""
+    try:
+        file_content = await drive_api.download_file(
+            user_email=user_email,
+            file_id=file_id
+        )
+        return {"success": True, "content": file_content}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/drive/files", response_model=DriveFileResponse)
+async def create_drive_file(
+    user_email: str = Query(..., description="User email"),
+    name: str = Query(..., description="File name"),
+    mime_type: str = Query(..., description="MIME type"),
+    content: Optional[str] = Query(None, description="File content"),
+    parents: Optional[List[str]] = Query(None, description="Parent folder IDs")
+):
+    """Create a new file in Google Drive"""
+    try:
+        file_data = await drive_api.create_file(
+            user_email=user_email,
+            name=name,
+            mime_type=mime_type,
+            content=content.encode() if content else None,
+            parents=parents
+        )
+        return DriveFileResponse(
+            success=True,
+            file=file_data
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/drive/files/{file_id}")
+async def delete_drive_file(
+    file_id: str = Path(..., description="File ID"),
+    user_email: str = Query(..., description="User email")
+):
+    """Delete a file from Google Drive"""
+    try:
+        result = await drive_api.delete_file(
+            user_email=user_email,
+            file_id=file_id
+        )
+        return {"success": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/drive/search", response_model=DriveSearchResponse)
+async def search_drive_files(
+    user_email: str = Query(..., description="User email"),
+    query: str = Query(..., description="Search query"),
+    page_size: int = Query(50, description="Number of results to return")
+):
+    """Search for files in Google Drive"""
+    try:
+        results = await drive_api.search_files(
+            user_email=user_email,
+            query=query,
+            page_size=page_size
+        )
+        return DriveSearchResponse(
+            success=True,
+            files=results.get("files", []),
+            total=len(results.get("files", [])),
+            query=query
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Google Calendar Endpoints
+@router.get("/calendar/calendars", response_model=CalendarListResponse)
+async def list_calendars(user_email: str = Query(..., description="User email")):
+    """List all calendars for the user"""
+    try:
+        calendars = await calendar_api.list_calendars(user_email)
+        return CalendarListResponse(
+            success=True,
+            calendars=calendars.get("items", [])
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/calendar/events", response_model=EventListResponse)
+async def list_calendar_events(
+    user_email: str = Query(..., description="User email"),
+    calendar_id: str = Query("primary", description="Calendar ID"),
+    time_min: Optional[str] = Query(None, description="Start time (ISO format)"),
+    time_max: Optional[str] = Query(None, description="End time (ISO format)"),
+    max_results: int = Query(50, description="Maximum number of events to return")
+):
+    """List events from a calendar"""
+    try:
+        # Parse datetime strings
+        time_min_dt = datetime.fromisoformat(time_min.replace('Z', '+00:00')) if time_min else None
+        time_max_dt = datetime.fromisoformat(time_max.replace('Z', '+00:00')) if time_max else None
+        
+        events = await calendar_api.list_events(
+            user_email=user_email,
+            calendar_id=calendar_id,
+            time_min=time_min_dt,
+            time_max=time_max_dt,
+            max_results=max_results
+        )
+        return EventListResponse(
+            success=True,
+            events=events.get("items", []),
+            total=len(events.get("items", []))
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/calendar/events/{event_id}", response_model=EventResponse)
+async def get_calendar_event(
+    event_id: str = Path(..., description="Event ID"),
+    user_email: str = Query(..., description="User email"),
+    calendar_id: str = Query("primary", description="Calendar ID")
+):
+    """Get a specific calendar event"""
+    try:
+        event = await calendar_api.get_event(
+            user_email=user_email,
+            event_id=event_id,
+            calendar_id=calendar_id
+        )
+        return EventResponse(
+            success=True,
+            event=event
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/calendar/events", response_model=EventResponse)
+async def create_calendar_event(
+    user_email: str = Query(..., description="User email"),
+    calendar_id: str = Query("primary", description="Calendar ID"),
+    event_data: EventCreateRequest = None
+):
+    """Create a new calendar event"""
+    try:
+        event = await calendar_api.create_event(
+            user_email=user_email,
+            calendar_id=calendar_id,
+            summary=event_data.summary,
+            start_time=event_data.start_time,
+            end_time=event_data.end_time,
+            description=event_data.description,
+            location=event_data.location,
+            attendees=event_data.attendees
+        )
+        return EventResponse(
+            success=True,
+            event=event
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/calendar/events/{event_id}", response_model=EventResponse)
+async def update_calendar_event(
+    event_id: str = Path(..., description="Event ID"),
+    user_email: str = Query(..., description="User email"),
+    calendar_id: str = Query("primary", description="Calendar ID"),
+    event_data: EventCreateRequest = None
+):
+    """Update an existing calendar event"""
+    try:
+        event = await calendar_api.update_event(
+            user_email=user_email,
+            event_id=event_id,
+            calendar_id=calendar_id,
+            summary=event_data.summary,
+            start_time=event_data.start_time,
+            end_time=event_data.end_time,
+            description=event_data.description,
+            location=event_data.location,
+            attendees=event_data.attendees
+        )
+        return EventResponse(
+            success=True,
+            event=event
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/calendar/events/{event_id}")
+async def delete_calendar_event(
+    event_id: str = Path(..., description="Event ID"),
+    user_email: str = Query(..., description="User email"),
+    calendar_id: str = Query("primary", description="Calendar ID")
+):
+    """Delete a calendar event"""
+    try:
+        result = await calendar_api.delete_event(
+            user_email=user_email,
+            event_id=event_id,
+            calendar_id=calendar_id
+        )
+        return {"success": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/calendar/free-busy")
+async def get_free_busy(
+    user_email: str = Query(..., description="User email"),
+    time_min: str = Query(..., description="Start time (ISO format)"),
+    time_max: str = Query(..., description="End time (ISO format)"),
+    calendar_ids: Optional[List[str]] = Query(None, description="Calendar IDs")
+):
+    """Get free/busy information for calendars"""
+    try:
+        time_min_dt = datetime.fromisoformat(time_min.replace('Z', '+00:00'))
+        time_max_dt = datetime.fromisoformat(time_max.replace('Z', '+00:00'))
+        
+        free_busy = await calendar_api.get_free_busy(
+            user_email=user_email,
+            time_min=time_min_dt,
+            time_max=time_max_dt,
+            calendar_ids=calendar_ids
+        )
+        return {"success": True, "free_busy": free_busy}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) 

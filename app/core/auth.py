@@ -192,4 +192,13 @@ def validate_google_config() -> bool:
         raise ValueError("GOOGLE_CLIENT_ID is required")
     if not settings.google_client_secret:
         raise ValueError("GOOGLE_CLIENT_SECRET is required")
+    return True
+
+
+def validate_atlassian_config() -> bool:
+    """Validate that Atlassian OAuth configuration is complete"""
+    if not settings.atlassian_client_id:
+        raise ValueError("ATLASSIAN_CLIENT_ID is required")
+    if not settings.atlassian_client_secret:
+        raise ValueError("ATLASSIAN_CLIENT_SECRET is required")
     return True 
