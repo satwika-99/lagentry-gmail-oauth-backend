@@ -22,7 +22,7 @@ class GoogleDriveAPI:
     
     async def _get_headers(self, user_email: str) -> Dict[str, str]:
         """Get authorization headers for API requests"""
-        tokens = await db_manager.get_valid_tokens(user_email, "google")
+        tokens = db_manager.get_valid_tokens(user_email, "google")
         if not tokens:
             raise TokenError("No valid tokens found for user")
         

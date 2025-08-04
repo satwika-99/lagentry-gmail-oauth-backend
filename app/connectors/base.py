@@ -41,29 +41,37 @@ class BaseConnector(ABC):
         """Get available capabilities of this connector"""
         pass
     
-    async def _get_tokens(self) -> Optional[Dict[str, Any]]:
+    def _get_tokens(self) -> Optional[Dict[str, Any]]:
         """Get valid tokens for the user"""
+        print(f"DEBUG: _get_tokens called for {self.provider}, user_email: {self.user_email}")  # Debug line
         if not self._tokens:
-            self._tokens = await db_manager.get_valid_tokens(self.user_email, self.provider)
+            print(f"DEBUG: No cached tokens, calling db_manager.get_valid_tokens")  # Debug line
+            self._tokens = db_manager.get_valid_tokens(self.user_email, self.provider)
+            print(f"DEBUG: db_manager returned: {self._tokens}")  # Debug line
         return self._tokens
     
-    async def _validate_tokens(self) -> bool:
+    def _validate_tokens(self) -> bool:
         """Validate if tokens are still valid"""
-        tokens = await self._get_tokens()
+        print(f"DEBUG: _validate_tokens called for {self.provider}")  # Debug line
+        tokens = self._get_tokens()
+        print(f"DEBUG: _get_tokens returned: {tokens}")  # Debug line
         if not tokens:
+            print(f"DEBUG: No tokens found, raising TokenError")  # Debug line
             raise TokenError(f"No valid tokens found for {self.provider}")
+        print(f"DEBUG: Tokens found, returning True")  # Debug line
         return True
     
-    async def _log_activity(self, action: str, details: Dict[str, Any] = None) -> None:
+    def _log_activity(self, action: str, details: Dict[str, Any] = None) -> None:
         """Log connector activity"""
-        await db_manager.log_activity(
+        print(f"DEBUG: _log_activity called: {action} for {self.provider}")  # Debug line
+        db_manager.log_activity(
             user_email=self.user_email,
             provider=self.provider,
             action=action,
             details=details or {}
         )
     
-    async def _update_sync_time(self) -> None:
+    def _update_sync_time(self) -> None:
         """Update last sync time"""
         self._last_sync = datetime.now()
     
@@ -74,7 +82,7 @@ class BaseConnector(ABC):
     async def get_status(self) -> Dict[str, Any]:
         """Get connector status"""
         try:
-            tokens = await self._get_tokens()
+            tokens = self._get_tokens()
             connection_test = await self.test_connection()
             
             return {
@@ -118,7 +126,7 @@ class DataConnector(BaseConnector):
         pass
     
     @abstractmethod
-    async def delete_item(self, item_id: str, **kwargs) -> bool:
+    async def delete_item(self, item_id: str, **kwargs) -> Dict[str, Any]:
         """Delete an item"""
         pass
     
@@ -130,7 +138,7 @@ class DataConnector(BaseConnector):
     async def sync_items(self, **kwargs) -> Dict[str, Any]:
         """Sync items with local storage"""
         try:
-            await self._log_activity("sync_started")
+            self._log_activity("sync_started")
             
             # Get items from service
             items = await self.list_items(**kwargs)
@@ -139,8 +147,8 @@ class DataConnector(BaseConnector):
             processed = await self._process_items(items)
             
             # Update sync time
-            await self._update_sync_time()
-            await self._log_activity("sync_completed", {"items_count": len(processed)})
+            self._update_sync_time()
+            self._log_activity("sync_completed", {"items_count": len(processed)})
             
             return {
                 "success": True,
@@ -149,7 +157,7 @@ class DataConnector(BaseConnector):
             }
             
         except Exception as e:
-            await self._log_activity("sync_failed", {"error": str(e)})
+            self._log_activity("sync_failed", {"error": str(e)})
             raise ConnectorError(f"Sync failed: {str(e)}")
     
     async def _process_items(self, items: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -185,6 +193,10 @@ class CommunicationConnector(BaseConnector):
         """Get a specific message"""
         pass
     
+    def _filter_messages(self, messages: List[Dict[str, Any]], query: str) -> List[Dict[str, Any]]:
+        """Filter messages by query (override in subclasses)"""
+        return [msg for msg in messages if query.lower() in msg.get("text", "").lower()]
+
     async def search_messages(self, query: str, **kwargs) -> Dict[str, Any]:
         """Search for messages across channels"""
         try:
@@ -196,7 +208,7 @@ class CommunicationConnector(BaseConnector):
                 all_messages.extend(messages.get("messages", []))
             
             # Filter by query (implement in subclasses)
-            filtered = await self._filter_messages(all_messages, query)
+            filtered = self._filter_messages(all_messages, query)
             
             return {
                 "messages": filtered,
@@ -206,10 +218,6 @@ class CommunicationConnector(BaseConnector):
             
         except Exception as e:
             raise ConnectorError(f"Message search failed: {str(e)}")
-    
-    async def _filter_messages(self, messages: List[Dict[str, Any]], query: str) -> List[Dict[str, Any]]:
-        """Filter messages by query (override in subclasses)"""
-        return [msg for msg in messages if query.lower() in msg.get("text", "").lower()]
 
 
 class ProjectConnector(BaseConnector):

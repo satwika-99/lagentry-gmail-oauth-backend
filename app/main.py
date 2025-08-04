@@ -11,8 +11,9 @@ import uvicorn
 
 from .core.config import settings
 from .core.database import db_manager
-from .core.auth import validate_google_config
-from .api.v1 import auth, google, microsoft, slack, atlassian
+from .core.auth import validate_google_config, validate_slack_config, validate_atlassian_config
+from .core.config import validate_jira_config
+from .api.v1 import auth, google, microsoft, slack, atlassian, unified
 
 
 @asynccontextmanager
@@ -35,6 +36,24 @@ async def lifespan(app: FastAPI):
         print("✅ Google OAuth configuration validated")
     except Exception as e:
         print(f"⚠️  Google OAuth not configured: {e}")
+    
+    try:
+        validate_slack_config()
+        print("✅ Slack OAuth configuration validated")
+    except Exception as e:
+        print(f"⚠️  Slack OAuth not configured: {e}")
+    
+    try:
+        validate_atlassian_config()
+        print("✅ Atlassian OAuth configuration validated")
+    except Exception as e:
+        print(f"⚠️  Atlassian OAuth not configured: {e}")
+    
+    try:
+        validate_jira_config()
+        print("✅ Jira configuration validated")
+    except Exception as e:
+        print(f"⚠️  Jira not configured: {e}")
     
     print(f"🌐 Server will be available at: http://{settings.host}:{settings.port}")
     print(f"📚 API Documentation: http://{settings.host}:{settings.port}/docs")
@@ -69,6 +88,7 @@ app.include_router(google.router, prefix="/api/v1")
 app.include_router(microsoft.router, prefix="/api/v1")
 app.include_router(slack.router, prefix="/api/v1")
 app.include_router(atlassian.router, prefix="/api/v1")
+app.include_router(unified.router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -83,6 +103,7 @@ async def root():
             "microsoft": "/api/v1/microsoft",
             "slack": "/api/v1/slack",
             "atlassian": "/api/v1/atlassian",
+            "unified": "/api/v1/unified",
             "docs": "/docs",
             "health": "/health"
         }

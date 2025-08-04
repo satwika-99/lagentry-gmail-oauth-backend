@@ -201,4 +201,13 @@ def validate_atlassian_config() -> bool:
         raise ValueError("ATLASSIAN_CLIENT_ID is required")
     if not settings.atlassian_client_secret:
         raise ValueError("ATLASSIAN_CLIENT_SECRET is required")
+    return True
+
+
+def validate_slack_config() -> bool:
+    """Validate that Slack OAuth configuration is complete"""
+    if not settings.slack_client_id:
+        raise ValueError("SLACK_CLIENT_ID is required")
+    if not settings.slack_client_secret:
+        raise ValueError("SLACK_CLIENT_SECRET is required")
     return True 

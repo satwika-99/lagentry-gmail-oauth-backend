@@ -75,7 +75,7 @@ class SlackOAuthProvider(OAuthProvider):
                 
                 # Store tokens
                 expires_at = datetime.now() + timedelta(days=365)  # Slack tokens don't expire
-                await db_manager.store_tokens(
+                db_manager.store_tokens(
                     user_email=user_info.get("id"),  # Use Slack user ID as email
                     provider="slack",
                     access_token=token_info["access_token"],
@@ -108,12 +108,12 @@ class SlackOAuthProvider(OAuthProvider):
     async def revoke_tokens(self, user_email: str) -> bool:
         """Revoke access tokens for a user"""
         try:
-            tokens = await db_manager.get_valid_tokens(user_email, "slack")
+            tokens = db_manager.get_valid_tokens(user_email, "slack")
             if not tokens:
                 return True
             
             # Delete from database
-            await db_manager.delete_user_tokens(user_email, "slack")
+            db_manager.delete_user_tokens(user_email, "slack")
             return True
                 
         except Exception as e:
@@ -122,7 +122,7 @@ class SlackOAuthProvider(OAuthProvider):
     async def validate_tokens(self, user_email: str) -> Dict[str, Any]:
         """Validate if tokens are still valid"""
         try:
-            tokens = await db_manager.get_valid_tokens(user_email, "slack")
+            tokens = db_manager.get_valid_tokens(user_email, "slack")
             if not tokens:
                 return {"valid": False, "reason": "No tokens found"}
             
