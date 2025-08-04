@@ -12,7 +12,7 @@ import uvicorn
 from .core.config import settings
 from .core.database import db_manager
 from .core.auth import validate_google_config
-from .api.v1 import auth, google
+from .api.v1 import auth, google, microsoft, slack, atlassian
 
 
 @asynccontextmanager
@@ -66,6 +66,9 @@ app.add_middleware(
 # Include API routers
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(google.router, prefix="/api/v1")
+app.include_router(microsoft.router, prefix="/api/v1")
+app.include_router(slack.router, prefix="/api/v1")
+app.include_router(atlassian.router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -77,6 +80,9 @@ async def root():
         "endpoints": {
             "auth": "/api/v1/auth",
             "google": "/api/v1/google",
+            "microsoft": "/api/v1/microsoft",
+            "slack": "/api/v1/slack",
+            "atlassian": "/api/v1/atlassian",
             "docs": "/docs",
             "health": "/health"
         }

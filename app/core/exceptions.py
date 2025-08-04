@@ -70,8 +70,18 @@ class NetworkException(LagentryException):
 
 
 # Specific OAuth exceptions
+class OAuthError(OAuthException):
+    """Exception raised during OAuth operations"""
+    pass
+
+
 class OAuthCallbackException(OAuthException):
     """Exception raised during OAuth callback processing"""
+    pass
+
+
+class TokenError(TokenException):
+    """Exception raised when token operations fail"""
     pass
 
 
@@ -108,6 +118,11 @@ class AtlassianAPIException(ProviderException):
 
 class SlackAPIException(ProviderException):
     """Exception raised by Slack API operations"""
+    pass
+
+
+class ConnectorError(ProviderException):
+    """Exception raised by connector operations"""
     pass
 
 
@@ -155,6 +170,11 @@ class InvalidProviderException(ValidationException):
 
 
 # API exceptions
+class APIError(APIException):
+    """Exception raised when API operations fail"""
+    pass
+
+
 class APIResponseException(APIException):
     """Exception raised when API response is invalid"""
     pass

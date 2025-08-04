@@ -1,0 +1,328 @@
+"""
+Slack API Endpoints
+Handles Slack service operations (channels, messages, files, etc.)
+"""
+
+from fastapi import APIRouter, HTTPException, Query, Path
+from typing import Optional, List, Dict, Any
+from datetime import datetime
+
+from ...core.database import db_manager
+from ...core.config import settings
+from ...core.exceptions import APIError, TokenError
+from ...providers.slack.channels import slack_channels_api
+from ...schemas.slack import (
+    ChannelListResponse, ChannelResponse, MessageListResponse, MessageResponse,
+    FileListResponse, FileResponse, UserListResponse, UserResponse
+)
+
+router = APIRouter(prefix="/slack", tags=["Slack Services"])
+
+
+# Slack Channel Endpoints
+@router.get("/channels", response_model=ChannelListResponse)
+async def list_channels(user_email: str = Query(..., description="User email")):
+    """List Slack channels"""
+    try:
+        result = await slack_channels_api.list_channels(user_email)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/channels/{channel_id}", response_model=ChannelResponse)
+async def get_channel(
+    channel_id: str = Path(..., description="Channel ID"),
+    user_email: str = Query(..., description="User email")
+):
+    """Get a specific Slack channel"""
+    try:
+        channel = await slack_channels_api.get_channel_info(user_email, channel_id)
+        return {
+            "success": True,
+            "channel": channel
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/channels/{channel_id}/messages", response_model=MessageListResponse)
+async def get_channel_messages(
+    channel_id: str = Path(..., description="Channel ID"),
+    user_email: str = Query(..., description="User email"),
+    limit: int = Query(50, description="Maximum number of messages to return"),
+    oldest: Optional[str] = Query(None, description="Start time (Unix timestamp)"),
+    latest: Optional[str] = Query(None, description="End time (Unix timestamp)")
+):
+    """Get messages from a Slack channel"""
+    try:
+        result = await slack_channels_api.get_channel_messages(user_email, channel_id, limit, latest)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/channels/{channel_id}/messages")
+async def send_channel_message(
+    channel_id: str = Path(..., description="Channel ID"),
+    user_email: str = Query(..., description="User email"),
+    message: str = Query(..., description="Message content"),
+    thread_ts: Optional[str] = Query(None, description="Thread timestamp")
+):
+    """Send a message to a Slack channel"""
+    try:
+        result = await slack_channels_api.send_message(user_email, channel_id, message, thread_ts)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Slack Message Endpoints
+@router.get("/messages/{message_id}", response_model=MessageResponse)
+async def get_message(
+    message_id: str = Path(..., description="Message ID"),
+    user_email: str = Query(..., description="User email")
+):
+    """Get a specific Slack message"""
+    try:
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "message": "Slack API not yet implemented",
+            "message_id": message_id
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/messages/{message_id}")
+async def update_message(
+    message_id: str = Path(..., description="Message ID"),
+    user_email: str = Query(..., description="User email"),
+    message: str = Query(..., description="Updated message content")
+):
+    """Update a Slack message"""
+    try:
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "message": "Slack API not yet implemented",
+            "message_id": message_id,
+            "updated_message": message
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/messages/{message_id}")
+async def delete_message(
+    message_id: str = Path(..., description="Message ID"),
+    user_email: str = Query(..., description="User email")
+):
+    """Delete a Slack message"""
+    try:
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "message": "Slack API not yet implemented",
+            "message_id": message_id
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Slack File Endpoints
+@router.get("/files", response_model=FileListResponse)
+async def list_files(
+    user_email: str = Query(..., description="User email"),
+    limit: int = Query(50, description="Maximum number of files to return"),
+    page: Optional[str] = Query(None, description="Page token")
+):
+    """List Slack files"""
+    try:
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "message": "Slack API not yet implemented",
+            "files": [],
+            "total": 0
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/files/{file_id}", response_model=FileResponse)
+async def get_file(
+    file_id: str = Path(..., description="File ID"),
+    user_email: str = Query(..., description="User email")
+):
+    """Get a specific Slack file"""
+    try:
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "message": "Slack API not yet implemented",
+            "file_id": file_id
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/files/{file_id}")
+async def delete_file(
+    file_id: str = Path(..., description="File ID"),
+    user_email: str = Query(..., description="User email")
+):
+    """Delete a Slack file"""
+    try:
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "message": "Slack API not yet implemented",
+            "file_id": file_id
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Slack User Endpoints
+@router.get("/users", response_model=UserListResponse)
+async def list_users(
+    user_email: str = Query(..., description="User email"),
+    limit: int = Query(50, description="Maximum number of users to return"),
+    cursor: Optional[str] = Query(None, description="Cursor for pagination")
+):
+    """List Slack users"""
+    try:
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "message": "Slack API not yet implemented",
+            "users": [],
+            "total": 0
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/users/{user_id}", response_model=UserResponse)
+async def get_user(
+    user_id: str = Path(..., description="User ID"),
+    user_email: str = Query(..., description="User email")
+):
+    """Get a specific Slack user"""
+    try:
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "message": "Slack API not yet implemented",
+            "user_id": user_id
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Slack Search Endpoints
+@router.get("/search/messages")
+async def search_messages(
+    user_email: str = Query(..., description="User email"),
+    query: str = Query(..., description="Search query"),
+    sort: str = Query("timestamp", description="Sort order"),
+    sort_dir: str = Query("desc", description="Sort direction"),
+    count: int = Query(20, description="Number of results to return"),
+    page: Optional[str] = Query(None, description="Page token")
+):
+    """Search Slack messages"""
+    try:
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "message": "Slack API not yet implemented",
+            "query": query,
+            "messages": [],
+            "total": 0
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/search/files")
+async def search_files(
+    user_email: str = Query(..., description="User email"),
+    query: str = Query(..., description="Search query"),
+    sort: str = Query("timestamp", description="Sort order"),
+    sort_dir: str = Query("desc", description="Sort direction"),
+    count: int = Query(20, description="Number of results to return"),
+    page: Optional[str] = Query(None, description="Page token")
+):
+    """Search Slack files"""
+    try:
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "message": "Slack API not yet implemented",
+            "query": query,
+            "files": [],
+            "total": 0
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Slack Workspace Endpoints
+@router.get("/workspace/info")
+async def get_workspace_info(user_email: str = Query(..., description="User email")):
+    """Get Slack workspace information"""
+    try:
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "message": "Slack API not yet implemented",
+            "workspace": {}
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/workspace/stats")
+async def get_workspace_stats(user_email: str = Query(..., description="User email")):
+    """Get Slack workspace statistics"""
+    try:
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "message": "Slack API not yet implemented",
+            "stats": {}
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Slack Service Status
+@router.get("/status")
+async def get_slack_status(user_email: str = Query(..., description="User email")):
+    """Get Slack service status"""
+    try:
+        # Check if user has valid Slack tokens
+        tokens = db_manager.get_valid_tokens(user_email, "slack")
+        
+        return {
+            "success": True,
+            "provider": "slack",
+            "connected": bool(tokens),
+            "configured": bool(settings.slack_client_id and settings.slack_client_secret),
+            "services": ["channels", "messages", "files", "users", "search"],
+            "endpoints": [
+                "/auth/url",
+                "/auth/callback",
+                "/auth/validate", 
+                "/auth/revoke",
+                "/channels",
+                "/messages",
+                "/files",
+                "/users",
+                "/search"
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) 
