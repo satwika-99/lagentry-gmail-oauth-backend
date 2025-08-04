@@ -19,7 +19,7 @@ class SlackChannelsAPI:
     
     async def _get_headers(self, user_email: str) -> Dict[str, str]:
         """Get authorization headers for API calls"""
-        tokens = await db_manager.get_tokens(user_email, "slack")
+        tokens = db_manager.get_tokens(user_email, "slack")
         if not tokens:
             raise APIError("No valid Slack tokens found")
         

@@ -85,7 +85,7 @@ class GoogleOAuthProvider(OAuthProvider):
                 
                 # Store tokens
                 expires_at = datetime.now() + timedelta(seconds=token_info.get("expires_in", 3600))
-                await db_manager.store_tokens(
+                db_manager.store_tokens(
                     user_email=user_info["email"],
                     provider="google",
                     access_token=token_info["access_token"],
@@ -138,7 +138,7 @@ class GoogleOAuthProvider(OAuthProvider):
     async def revoke_tokens(self, user_email: str) -> bool:
         """Revoke access tokens for a user"""
         try:
-            tokens = await db_manager.get_valid_tokens(user_email, "google")
+            tokens = db_manager.get_valid_tokens(user_email, "google")
             if not tokens:
                 return True
             
@@ -149,7 +149,7 @@ class GoogleOAuthProvider(OAuthProvider):
                     await client.post(revoke_url, data={"token": tokens["access_token"]})
                 
                 # Delete from database
-                await db_manager.delete_user_tokens(user_email, "google")
+                db_manager.delete_user_tokens(user_email, "google")
                 return True
                 
         except Exception as e:
@@ -158,7 +158,7 @@ class GoogleOAuthProvider(OAuthProvider):
     async def validate_tokens(self, user_email: str) -> Dict[str, Any]:
         """Validate if tokens are still valid"""
         try:
-            tokens = await db_manager.get_valid_tokens(user_email, "google")
+            tokens = db_manager.get_valid_tokens(user_email, "google")
             if not tokens:
                 return {"valid": False, "reason": "No tokens found"}
             

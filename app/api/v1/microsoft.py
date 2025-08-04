@@ -316,7 +316,7 @@ async def get_microsoft_status(user_email: str = Query(..., description="User em
     """Get Microsoft service status"""
     try:
         # Check if user has valid Microsoft tokens
-        tokens = await db_manager.get_valid_tokens(user_email, "microsoft")
+        tokens = db_manager.get_valid_tokens(user_email, "microsoft")
         
         return {
             "success": True,

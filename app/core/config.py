@@ -74,6 +74,11 @@ class Settings(BaseSettings):
         env="ATLASSIAN_SCOPES"
     )
     
+    # Jira Configuration (for API token authentication)
+    jira_instance_url: Optional[str] = Field(default=None, env="JIRA_INSTANCE_URL")
+    jira_username: Optional[str] = Field(default=None, env="JIRA_USERNAME")
+    jira_api_token: Optional[str] = Field(default=None, env="JIRA_API_TOKEN")
+    
     # Slack OAuth settings (for future use)
     slack_client_id: Optional[str] = Field(default=None, env="SLACK_CLIENT_ID")
     slack_client_secret: Optional[str] = Field(default=None, env="SLACK_CLIENT_SECRET")
@@ -140,4 +145,15 @@ def validate_slack_config() -> bool:
         raise ValueError("SLACK_CLIENT_ID is required")
     if not settings.slack_client_secret:
         raise ValueError("SLACK_CLIENT_SECRET is required")
+    return True
+
+
+def validate_jira_config() -> bool:
+    """Validate that Jira configuration is complete"""
+    if not settings.jira_instance_url:
+        raise ValueError("JIRA_INSTANCE_URL is required")
+    if not settings.jira_username:
+        raise ValueError("JIRA_USERNAME is required")
+    if not settings.jira_api_token:
+        raise ValueError("JIRA_API_TOKEN is required")
     return True 
