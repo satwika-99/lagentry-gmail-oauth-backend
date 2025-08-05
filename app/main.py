@@ -13,7 +13,7 @@ from .core.config import settings
 from .core.database import db_manager
 from .core.auth import validate_google_config, validate_slack_config, validate_atlassian_config
 from .core.config import validate_jira_config
-from .api.v1 import auth, google, microsoft, slack, atlassian, unified
+from .api.v1 import auth, google, microsoft, slack, atlassian, confluence, unified
 
 
 @asynccontextmanager
@@ -88,6 +88,7 @@ app.include_router(google.router, prefix="/api/v1")
 app.include_router(microsoft.router, prefix="/api/v1")
 app.include_router(slack.router, prefix="/api/v1")
 app.include_router(atlassian.router, prefix="/api/v1")
+app.include_router(confluence.router, prefix="/api/v1")
 app.include_router(unified.router, prefix="/api/v1")
 
 

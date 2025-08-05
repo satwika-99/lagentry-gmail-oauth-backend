@@ -78,11 +78,11 @@ class OAuthService:
             
             if refresh_result:
                 # Update stored tokens
-                db_manager.update_tokens(
+                db_manager.refresh_tokens(
                     user_email, provider,
-                    access_token=refresh_result["access_token"],
-                    refresh_token=refresh_result.get("refresh_token"),
-                    expires_at=datetime.now() + timedelta(seconds=refresh_result["expires_in"])
+                    refresh_result["access_token"],
+                    refresh_result.get("refresh_token", ""),
+                    refresh_result["expires_in"]
                 )
                 
                 db_manager.log_activity(
