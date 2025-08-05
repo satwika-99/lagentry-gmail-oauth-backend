@@ -142,14 +142,14 @@ class AtlassianOAuthProvider(OAuthProvider):
     async def revoke_tokens(self, user_email: str) -> bool:
         """Revoke Atlassian tokens"""
         try:
-            tokens = db_manager.get_tokens(user_email, "atlassian")
+            tokens = db_manager.get_valid_tokens(user_email, "atlassian")
             if not tokens:
                 return True
             
             async with httpx.AsyncClient() as client:
                 # Atlassian doesn't have a standard token revocation endpoint
                 # We'll just remove from our database
-                db_manager.delete_tokens(user_email, "atlassian")
+                db_manager.delete_user_tokens(user_email, "atlassian")
                 return True
                 
         except Exception as e:
@@ -158,7 +158,7 @@ class AtlassianOAuthProvider(OAuthProvider):
     async def validate_tokens(self, user_email: str) -> Dict[str, Any]:
         """Validate Atlassian tokens and get user info"""
         try:
-            tokens = db_manager.get_tokens(user_email, "atlassian")
+            tokens = db_manager.get_valid_tokens(user_email, "atlassian")
             if not tokens:
                 return {"valid": False, "reason": "No tokens found"}
             
@@ -168,11 +168,11 @@ class AtlassianOAuthProvider(OAuthProvider):
                 refresh_result = await self.refresh_access_token(tokens.get("refresh_token"))
                 if refresh_result:
                     # Update stored tokens
-                    db_manager.update_tokens(
+                    db_manager.refresh_tokens(
                         user_email, "atlassian",
-                        access_token=refresh_result["access_token"],
-                        refresh_token=refresh_result.get("refresh_token"),
-                        expires_at=datetime.now() + timedelta(seconds=refresh_result["expires_in"])
+                        refresh_result["access_token"],
+                        refresh_result.get("refresh_token", ""),
+                        refresh_result["expires_in"]
                     )
                     tokens["access_token"] = refresh_result["access_token"]
                 else:

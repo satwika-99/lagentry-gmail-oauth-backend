@@ -43,11 +43,8 @@ class BaseConnector(ABC):
     
     def _get_tokens(self) -> Optional[Dict[str, Any]]:
         """Get valid tokens for the user"""
-        print(f"DEBUG: _get_tokens called for {self.provider}, user_email: {self.user_email}")  # Debug line
         if not self._tokens:
-            print(f"DEBUG: No cached tokens, calling db_manager.get_valid_tokens")  # Debug line
             self._tokens = db_manager.get_valid_tokens(self.user_email, self.provider)
-            print(f"DEBUG: db_manager returned: {self._tokens}")  # Debug line
         return self._tokens
     
     def _validate_tokens(self) -> bool:

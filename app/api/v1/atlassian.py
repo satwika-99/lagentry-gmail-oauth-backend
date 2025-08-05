@@ -10,7 +10,7 @@ from datetime import datetime
 from ...core.config import settings
 from ...core.auth import validate_atlassian_config
 from ...providers.atlassian.auth import atlassian_oauth
-from ...providers.atlassian.jira import jira_api
+from ...services.connector_service import connector_service
 from ...schemas.atlassian import (
     ProjectListResponse,
     IssueListResponse,
@@ -96,7 +96,8 @@ async def list_jira_projects(
 ):
     """List Jira projects accessible to the user"""
     try:
-        result = await jira_api.list_projects(user_email, max_results)
+        connector = connector_service.get_connector("atlassian", user_email)
+        result = await connector.list_projects(max_results=max_results)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -109,11 +110,9 @@ async def get_jira_project(
 ):
     """Get specific Jira project details"""
     try:
-        project = await jira_api.get_project(user_email, project_key)
-        return {
-            "success": True,
-            "project": project
-        }
+        connector = connector_service.get_connector("atlassian", user_email)
+        result = await connector.get_project(project_key)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -127,7 +126,11 @@ async def list_jira_issues(
 ):
     """List Jira issues with optional filtering"""
     try:
-        result = await jira_api.list_issues(user_email, project_key, assignee, max_results)
+        connector = connector_service.get_connector("atlassian", user_email)
+        if project_key:
+            result = await connector.list_issues(project_key, max_results=max_results)
+        else:
+            result = await connector.get_my_issues(max_results=max_results)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -140,11 +143,9 @@ async def get_jira_issue(
 ):
     """Get specific Jira issue details"""
     try:
-        issue = await jira_api.get_issue(user_email, issue_key)
-        return {
-            "success": True,
-            "issue": issue
-        }
+        connector = connector_service.get_connector("atlassian", user_email)
+        result = await connector.get_issue(issue_key)
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -156,17 +157,16 @@ async def create_jira_issue(
 ):
     """Create a new Jira issue"""
     try:
-        issue = await jira_api.create_issue(
-            user_email,
+        connector = connector_service.get_connector("atlassian", user_email)
+        result = await connector.create_issue(
             request.project_key,
-            request.summary,
-            request.description,
-            request.issue_type
+            {
+                "summary": request.summary,
+                "description": request.description,
+                "issue_type": request.issue_type
+            }
         )
-        return {
-            "success": True,
-            "issue": issue
-        }
+        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -179,7 +179,8 @@ async def update_jira_issue(
 ):
     """Update an existing Jira issue"""
     try:
-        result = await jira_api.update_issue(user_email, issue_key, request.updates)
+        connector = connector_service.get_connector("atlassian", user_email)
+        result = await connector.update_issue(issue_key, request.updates)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -193,7 +194,8 @@ async def search_jira_issues(
 ):
     """Search Jira issues using JQL"""
     try:
-        result = await jira_api.search_issues(user_email, query, max_results)
+        connector = connector_service.get_connector("atlassian", user_email)
+        result = await connector.search_issues(query, max_results=max_results)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -206,7 +208,8 @@ async def get_my_jira_issues(
 ):
     """Get issues assigned to the current user"""
     try:
-        result = await jira_api.get_my_issues(user_email, max_results)
+        connector = connector_service.get_connector("atlassian", user_email)
+        result = await connector.get_my_issues(max_results=max_results)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -220,7 +223,8 @@ async def get_project_issues(
 ):
     """Get all issues for a specific project"""
     try:
-        result = await jira_api.get_project_issues(user_email, project_key, max_results)
+        connector = connector_service.get_connector("atlassian", user_email)
+        result = await connector.list_issues(project_key, max_results=max_results)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

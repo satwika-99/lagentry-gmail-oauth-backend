@@ -102,6 +102,33 @@ class PageListResponse(BaseModel):
     total: int = Field(0, description="Total number of pages")
 
 
+class PageDetailResponse(BaseModel):
+    """Response model for Confluence page details"""
+    success: bool = Field(..., description="Operation success status")
+    page: Dict[str, Any] = Field(..., description="Confluence page details")
+
+
+class PageCreateRequest(BaseModel):
+    """Request model for creating Confluence pages"""
+    space_key: str = Field(..., description="Space key")
+    title: str = Field(..., description="Page title")
+    content: str = Field(..., description="Page content")
+    parent_id: Optional[str] = Field(None, description="Parent page ID")
+
+
+class PageUpdateRequest(BaseModel):
+    """Request model for updating Confluence pages"""
+    title: str = Field(..., description="Page title")
+    content: str = Field(..., description="Page content")
+    version: int = Field(1, description="Page version")
+
+
+class SpaceDetailResponse(BaseModel):
+    """Response model for Confluence space details"""
+    success: bool = Field(..., description="Operation success status")
+    space: Dict[str, Any] = Field(..., description="Confluence space details")
+
+
 # Bitbucket Schemas
 class RepositoryInfo(BaseModel):
     """Bitbucket repository information"""
