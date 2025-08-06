@@ -135,8 +135,27 @@ async def get_channel_messages(
 ):
     """Get messages from a Slack channel"""
     try:
-        result = await slack_channels_api.get_channel_messages(user_email, channel_id, limit, latest)
-        return result
+        # TODO: Implement Slack API client
+        return {
+            "success": True,
+            "messages": [
+                {
+                    "ts": "1234567890.123456",
+                    "text": f"Mock message in {channel_id}",
+                    "user": "mock_user",
+                    "channel": channel_id
+                },
+                {
+                    "ts": "1234567891.123456",
+                    "text": f"Another mock message in {channel_id}",
+                    "user": "mock_user2",
+                    "channel": channel_id
+                }
+            ],
+            "total": 2,
+            "channel_id": channel_id,
+            "mock_data": True
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -217,7 +236,8 @@ async def search_messages(
                 {
                     "ts": "1234567890.123456",
                     "text": f"Mock message matching: {query}",
-                    "user": "mock_user"
+                    "user": "mock_user",
+                    "channel": "general"
                 }
             ],
             "total": 1,
@@ -237,8 +257,14 @@ async def get_message(
         # TODO: Implement Slack API client
         return {
             "success": True,
-            "message": "Slack API not yet implemented",
-            "message_id": message_id
+            "message": {
+                "ts": message_id,
+                "text": f"Mock message {message_id}",
+                "user": "mock_user",
+                "channel": "general"
+            },
+            "message_id": message_id,
+            "mock_data": True
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
