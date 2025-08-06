@@ -168,19 +168,31 @@ async def send_channel_message(
     thread_ts: Optional[str] = Query(None, description="Thread timestamp")
 ):
     """Send a message to a Slack channel"""
+    import httpx
     try:
-        # Return mock data instead of trying to use non-existent Slack API client
-        return {
-            "success": True,
-            "message": {
-                "ts": "1234567890.123456",
-                "channel": channel_id,
-                "text": message,
-                "user": user_email,
-                "thread_ts": thread_ts
-            },
-            "mock_data": True
+        slack_token = settings.slack_bot_token  # Make sure this is set in your config/env
+        if not slack_token:
+            raise HTTPException(status_code=500, detail="Slack bot token not configured")
+        url = "https://slack.com/api/chat.postMessage"
+        headers = {
+            "Authorization": f"Bearer {slack_token}",
+            "Content-Type": "application/json"
         }
+        payload = {
+            "channel": channel_id,
+            "text": message
+        }
+        if thread_ts:
+            payload["thread_ts"] = thread_ts
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, headers=headers, json=payload)
+            data = response.json()
+            if not data.get("ok"):
+                raise HTTPException(status_code=400, detail=f"Slack API error: {data.get('error')}")
+            return {
+                "success": True,
+                "message": data
+            }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
