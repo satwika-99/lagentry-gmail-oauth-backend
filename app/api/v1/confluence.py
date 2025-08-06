@@ -29,10 +29,28 @@ async def get_confluence_auth_url(
     """Get Confluence OAuth URL (uses same Atlassian OAuth as Jira)"""
     try:
         validate_atlassian_config()
-        auth_url = atlassian_oauth.get_auth_url(
-            state=state,
-            scopes=scopes or ["read:confluence-content", "write:confluence-content"]
-        )
+        
+        # Use Confluence-specific redirect URI
+        from ...core.config import settings
+        from urllib.parse import urlencode
+        
+        client_id = settings.atlassian_client_id
+        redirect_uri = settings.confluence_redirect_uri
+        requested_scopes = scopes or ["read:confluence-content.all", "write:confluence-content", "read:confluence-space.summary", "read:confluence-user"]
+        
+        params = {
+            "audience": "api.atlassian.com",
+            "client_id": client_id,
+            "redirect_uri": redirect_uri,
+            "scope": " ".join(requested_scopes),
+            "response_type": "code",
+            "prompt": "consent",
+            "state": state or ""
+        }
+        
+        query_string = "&".join([f"{k}={v}" for k, v in params.items()])
+        auth_url = f"https://auth.atlassian.com/authorize?{query_string}"
+        
         return {"auth_url": auth_url}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,0 +1,52 @@
+{
+  "google": {
+    "oauth": true,
+    "api": true,
+    "errors": []
+  },
+  "jira": {
+    "oauth": true,
+    "api": true,
+    "errors": []
+  },
+  "slack": {
+    "oauth": true,
+    "api": true,
+    "errors": []
+  },
+  "confluence": {
+    "oauth": true,
+    "api": true,
+    "errors": []
+  },
+  "endpoints": {
+    "/": {
+      "status": 200,
+      "accessible": true
+    },
+    "/docs": {
+      "status": 200,
+      "accessible": true
+    },
+    "/openapi.json": {
+      "status": 200,
+      "accessible": true
+    },
+    "/api/v1/google/auth/url": {
+      "status": 200,
+      "accessible": true
+    },
+    "/api/v1/atlassian/auth/url": {
+      "status": 200,
+      "accessible": true
+    },
+    "/api/v1/slack/auth/url": {
+      "status": 200,
+      "accessible": true
+    },
+    "/api/v1/confluence/auth/url": {
+      "status": 200,
+      "accessible": true
+    }
+  }
+}

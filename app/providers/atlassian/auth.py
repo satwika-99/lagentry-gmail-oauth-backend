@@ -208,9 +208,12 @@ class AtlassianOAuthProvider(OAuthProvider):
                 "manage:jira-configuration"
             ],
             "confluence": [
+                "read:confluence-content.all",
+                "write:confluence-content",
+                "read:confluence-space.summary",
+                "read:confluence-user",
                 "read:confluence-content.summary",
                 "read:confluence-props",
-                "write:confluence-content",
                 "write:confluence-props"
             ],
             "bitbucket": [
