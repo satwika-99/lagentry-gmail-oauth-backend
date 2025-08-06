@@ -83,18 +83,20 @@ class Settings(BaseSettings):
     slack_client_id: Optional[str] = Field(default=None, env="SLACK_CLIENT_ID")
     slack_client_secret: Optional[str] = Field(default=None, env="SLACK_CLIENT_SECRET")
     slack_redirect_uri: str = Field(
-        default="http://127.0.0.1:8081/auth/slack/callback",
+        default="http://127.0.0.1:8083/auth/slack/callback",
         env="SLACK_REDIRECT_URI"
     )
     slack_scopes: List[str] = Field(
         default=[
             "channels:read",
             "channels:history",
+            "chat:write",
             "users:read",
             "users:read.email"
         ],
         env="SLACK_SCOPES"
     )
+    slack_bot_token: Optional[str] = Field(default=None, env="SLACK_BOT_TOKEN")
     
     # Security settings
     secret_key: str = Field(default="your-secret-key-here", env="SECRET_KEY")
