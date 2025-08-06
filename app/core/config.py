@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     
     # Server settings
     host: str = Field(default="127.0.0.1", env="HOST")
-    port: int = Field(default=8081, env="PORT")
+    port: int = Field(default=8083, env="PORT")
     
     # Database settings
     database_path: str = Field(default="oauth_tokens.db", env="DATABASE_PATH")
@@ -30,7 +30,8 @@ class Settings(BaseSettings):
             "http://127.0.0.1:3000",
             "http://localhost:8000",
             "http://127.0.0.1:8000",
-            "http://127.0.0.1:8081"
+            "http://127.0.0.1:8081",
+            "http://127.0.0.1:8083"
         ],
         env="CORS_ORIGINS"
     )
@@ -72,6 +73,12 @@ class Settings(BaseSettings):
             "read:me"
         ],
         env="ATLASSIAN_SCOPES"
+    )
+    
+    # Confluence OAuth settings (uses same Atlassian OAuth as Jira)
+    confluence_redirect_uri: str = Field(
+        default="http://127.0.0.1:8083/api/v1/confluence/auth/callback",
+        env="CONFLUENCE_REDIRECT_URI"
     )
     
     # Jira Configuration (for API token authentication)
