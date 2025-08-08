@@ -12,8 +12,8 @@ import uvicorn
 from .core.config import settings
 from .core.database import db_manager
 from .core.auth import validate_google_config, validate_slack_config, validate_atlassian_config
-from .core.config import validate_jira_config
-from .api.v1 import auth, google, microsoft, slack, atlassian, confluence, unified
+from .core.config import validate_jira_config, validate_microsoft_config, validate_notion_config
+from .api.v1 import auth, google, microsoft, slack, atlassian, confluence, unified, notion
 
 
 @asynccontextmanager
@@ -55,6 +55,18 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"⚠️  Jira not configured: {e}")
     
+    try:
+        validate_microsoft_config()
+        print("✅ Microsoft OAuth configuration validated")
+    except Exception as e:
+        print(f"⚠️  Microsoft OAuth not configured: {e}")
+    
+    try:
+        validate_notion_config()
+        print("✅ Notion OAuth configuration validated")
+    except Exception as e:
+        print(f"⚠️  Notion OAuth not configured: {e}")
+    
     print(f"🌐 Server will be available at: http://{settings.host}:{settings.port}")
     print(f"📚 API Documentation: http://{settings.host}:{settings.port}/docs")
     print("=" * 50)
@@ -90,6 +102,7 @@ app.include_router(slack.router, prefix="/api/v1")
 app.include_router(atlassian.router, prefix="/api/v1")
 app.include_router(confluence.router, prefix="/api/v1")
 app.include_router(unified.router, prefix="/api/v1")
+app.include_router(notion.router, prefix="/api/v1")
 
 
 @app.get("/")
