@@ -51,12 +51,21 @@ class Settings(BaseSettings):
         env="GOOGLE_SCOPES"
     )
     
-    # Microsoft OAuth settings (for future use)
+    # Microsoft OAuth settings
     microsoft_client_id: Optional[str] = Field(default=None, env="MICROSOFT_CLIENT_ID")
     microsoft_client_secret: Optional[str] = Field(default=None, env="MICROSOFT_CLIENT_SECRET")
+    microsoft_tenant_id: Optional[str] = Field(default=None, env="MICROSOFT_TENANT_ID")
     microsoft_redirect_uri: str = Field(
-        default="http://127.0.0.1:8081/auth/microsoft/callback",
+        default="http://localhost:8084/api/v1/microsoft/callback",
         env="MICROSOFT_REDIRECT_URI"
+    )
+
+    # Notion OAuth settings
+    notion_client_id: Optional[str] = Field(default=None, env="NOTION_CLIENT_ID")
+    notion_client_secret: Optional[str] = Field(default=None, env="NOTION_CLIENT_SECRET")
+    notion_redirect_uri: str = Field(
+        default="http://localhost:8084/api/v1/notion/callback",
+        env="NOTION_REDIRECT_URI"
     )
     
     # Atlassian OAuth settings (for future use)
@@ -165,4 +174,13 @@ def validate_jira_config() -> bool:
         raise ValueError("JIRA_USERNAME is required")
     if not settings.jira_api_token:
         raise ValueError("JIRA_API_TOKEN is required")
+    return True
+
+
+def validate_notion_config() -> bool:
+    """Validate that Notion OAuth configuration is complete"""
+    if not settings.notion_client_id:
+        raise ValueError("NOTION_CLIENT_ID is required")
+    if not settings.notion_client_secret:
+        raise ValueError("NOTION_CLIENT_SECRET is required")
     return True 

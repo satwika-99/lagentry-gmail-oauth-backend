@@ -1,0 +1,62 @@
+{
+  "timestamp": "2025-08-08T14:41:20.373427",
+  "summary": {
+    "total": 10,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 8,
+    "success_rate": 20.0
+  },
+  "results": [
+    {
+      "test": "Microsoft OAuth URL",
+      "status": "\u2705 PASS",
+      "details": "OAuth URL generated successfully: https://login.microsoftonline.com/your-tenant-id/o..."
+    },
+    {
+      "test": "Microsoft Service Status",
+      "status": "\u2705 PASS",
+      "details": "All services implemented: ['outlook', 'onedrive', 'teams', 'sharepoint', 'calendar', 'profile']"
+    },
+    {
+      "test": "Outlook Emails (Authentication Required)",
+      "status": "\u26a0\ufe0f SKIP",
+      "details": "OAuth authentication required - this is expected"
+    },
+    {
+      "test": "Outlook Folders (Authentication Required)",
+      "status": "\u26a0\ufe0f SKIP",
+      "details": "OAuth authentication required - this is expected"
+    },
+    {
+      "test": "OneDrive Files (Authentication Required)",
+      "status": "\u26a0\ufe0f SKIP",
+      "details": "OAuth authentication required - this is expected"
+    },
+    {
+      "test": "OneDrive Search (Authentication Required)",
+      "status": "\u26a0\ufe0f SKIP",
+      "details": "OAuth authentication required - this is expected"
+    },
+    {
+      "test": "Teams Channels (Authentication Required)",
+      "status": "\u26a0\ufe0f SKIP",
+      "details": "OAuth authentication required - this is expected"
+    },
+    {
+      "test": "SharePoint Sites (Authentication Required)",
+      "status": "\u26a0\ufe0f SKIP",
+      "details": "OAuth authentication required - this is expected"
+    },
+    {
+      "test": "Calendar Events (Authentication Required)",
+      "status": "\u26a0\ufe0f SKIP",
+      "details": "OAuth authentication required - this is expected"
+    },
+    {
+      "test": "User Profile (Authentication Required)",
+      "status": "\u26a0\ufe0f SKIP",
+      "details": "OAuth authentication required - this is expected"
+    }
+  ]
+}
