@@ -7,11 +7,11 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from fastapi.responses import RedirectResponse
 from typing import List, Dict, Any, Optional
 
-from ...core.auth import get_provider
-from ...core.database import db_manager
-from ...core.exceptions import OAuthCallbackException, InvalidProviderException
-from ...core.utils import create_success_response, create_error_response, validate_provider
-from ...schemas.auth import (
+from core.auth import get_provider
+from core.database import db_manager
+from core.exceptions import OAuthCallbackException, InvalidProviderException
+from core.utils import create_success_response, create_error_response, validate_provider
+from schemas.auth import (
     OAuthCallbackResponse, AuthUrlResponse, UserTokensResponse,
     TokenValidationResponse, RevokeTokenResponse, ProviderInfo
 )

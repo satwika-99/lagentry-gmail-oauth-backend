@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  lagentry-backend:
+    build: .
+    container_name: lagentry-oauth-backend
+    ports:
+      - "8081:8081"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8081
+      - DEBUG=true
+      - DATABASE_PATH=/app/data/oauth_tokens.db
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
+      - ATLASSIAN_CLIENT_ID=${ATLASSIAN_CLIENT_ID}
+      - ATLASSIAN_CLIENT_SECRET=${ATLASSIAN_CLIENT_SECRET}
+      - ATLASSIAN_REDIRECT_URI=${ATLASSIAN_REDIRECT_URI}
+      - SLACK_CLIENT_ID=${SLACK_CLIENT_ID}
+      - SLACK_CLIENT_SECRET=${SLACK_CLIENT_SECRET}
+      - SLACK_REDIRECT_URI=${SLACK_REDIRECT_URI}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./data:/app/data
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8081/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add a database service if you want to use PostgreSQL instead of SQLite
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: lagentry-postgres
+  #   environment:
+  #     POSTGRES_DB: lagentry_oauth
+  #     POSTGRES_USER: lagentry
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lagentry123}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -9,11 +9,11 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import uvicorn
 
-from .core.config import settings
-from .core.database import db_manager
-from .core.auth import validate_google_config, validate_slack_config, validate_atlassian_config
-from .core.config import validate_jira_config, validate_microsoft_config, validate_notion_config
-from .api.v1 import auth, google, microsoft, slack, atlassian, confluence, unified, notion
+from core.config import settings
+from core.database import db_manager
+from core.auth import validate_google_config, validate_slack_config, validate_atlassian_config
+from core.config import validate_jira_config, validate_microsoft_config, validate_notion_config
+# from api.v1 import auth, google, microsoft, slack, atlassian, confluence, unified, notion
 
 
 @asynccontextmanager
@@ -95,14 +95,14 @@ app.add_middleware(
 )
 
 # Include API routers
-app.include_router(auth.router, prefix="/api/v1")
-app.include_router(google.router, prefix="/api/v1")
-app.include_router(microsoft.router, prefix="/api/v1")
-app.include_router(slack.router, prefix="/api/v1")
-app.include_router(atlassian.router, prefix="/api/v1")
-app.include_router(confluence.router, prefix="/api/v1")
-app.include_router(unified.router, prefix="/api/v1")
-app.include_router(notion.router, prefix="/api/v1")
+# app.include_router(auth.router, prefix="/api/v1")
+# app.include_router(google.router, prefix="/api/v1")
+# app.include_router(microsoft.router, prefix="/api/v1")
+# app.include_router(slack.router, prefix="/api/v1")
+# app.include_router(atlassian.router, prefix="/api/v1")
+# app.include_router(confluence.router, prefix="/api/v1")
+# app.include_router(unified.router, prefix="/api/v1")
+# app.include_router(notion.router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -138,7 +138,7 @@ async def health_check():
 async def get_emails(user_email: str, max_results: int = 10):
     """Legacy endpoint for backward compatibility"""
     try:
-        from .providers.google.gmail import gmail_service
+        from providers.google.gmail import gmail_service
         result = await gmail_service.get_user_emails(user_email, max_results)
         return result
     except Exception as e:
