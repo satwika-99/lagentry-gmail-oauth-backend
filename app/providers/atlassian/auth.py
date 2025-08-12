@@ -8,10 +8,10 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 import json
 
-from ...core.auth import OAuthProvider
-from ...core.config import settings
-from ...core.database import db_manager
-from ...core.exceptions import OAuthError, TokenError
+from core.auth import OAuthProvider
+from core.config import settings
+from core.database import db_manager
+from core.exceptions import OAuthError, TokenError
 
 
 class AtlassianOAuthProvider(OAuthProvider):

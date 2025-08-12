@@ -8,8 +8,8 @@ from typing import Dict, Any, Optional, List, Union
 from datetime import datetime
 import asyncio
 
-from ..core.database import db_manager
-from ..core.exceptions import ConnectorError, TokenError
+from core.database import db_manager
+from core.exceptions import ConnectorError, TokenError
 
 
 class BaseConnector(ABC):

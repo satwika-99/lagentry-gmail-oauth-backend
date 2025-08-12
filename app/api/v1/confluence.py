@@ -6,10 +6,10 @@ Handles Confluence operations using the same Atlassian OAuth credentials
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List, Dict, Any
 
-from ...core.auth import validate_atlassian_config
-from ...providers.atlassian.auth import atlassian_oauth
-from ...services.connector_service import connector_service
-from ...schemas.atlassian import (
+from core.auth import validate_atlassian_config
+from providers.atlassian.auth import atlassian_oauth
+from services.connector_service import connector_service
+from schemas.atlassian import (
     SpaceListResponse,
     SpaceDetailResponse,
     PageListResponse,
@@ -31,7 +31,7 @@ async def get_confluence_auth_url(
         validate_atlassian_config()
         
         # Use Confluence-specific redirect URI
-        from ...core.config import settings
+        from core.config import settings
         from urllib.parse import urlencode
         
         client_id = settings.atlassian_client_id

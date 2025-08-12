@@ -7,13 +7,13 @@ from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from ...providers.google.auth import google_provider
-from ...providers.google.gmail import gmail_service
-from ...providers.google.drive import drive_api
-from ...providers.google.calendar import calendar_api
-from ...core.database import db_manager
-from ...core.exceptions import APIError, TokenError
-from ...schemas.google import (
+from providers.google.auth import google_provider
+from providers.google.gmail import gmail_service
+from providers.google.drive import drive_api
+from providers.google.calendar import calendar_api
+from core.database import db_manager
+from core.exceptions import APIError, TokenError
+from schemas.google import (
     EmailListResponse, EmailResponse, LabelResponse, ProfileResponse,
     DriveFileListResponse, DriveFileResponse, DriveSearchResponse,
     CalendarListResponse, EventListResponse, EventResponse, EventCreateRequest

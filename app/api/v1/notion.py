@@ -7,17 +7,17 @@ from fastapi import APIRouter, HTTPException, Query, Path, Body
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from ...core.database import db_manager
-from ...core.exceptions import APIError, TokenError, AuthenticationException
-from ...schemas.notion import (
+from core.database import db_manager
+from core.exceptions import APIError, TokenError, AuthenticationException
+from schemas.notion import (
     NotionAuthUrlResponse, NotionCallbackResponse, NotionServiceStatus,
     NotionDatabaseListResponse, NotionDatabaseResponse,
     NotionPageListResponse, NotionPageResponse, NotionBlockListResponse,
     NotionUserResponse
 )
-from ...connectors.notion.oauth import get_auth_url, exchange_code_for_token
-from ...connectors.notion.api_client import NotionAPIClient
-from ...core.config import settings
+from connectors.notion.oauth import get_auth_url, exchange_code_for_token
+from connectors.notion.api_client import NotionAPIClient
+from core.config import settings
 
 router = APIRouter(prefix="/notion", tags=["Notion Services"])
 

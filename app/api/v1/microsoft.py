@@ -7,14 +7,14 @@ from fastapi import APIRouter, HTTPException, Query, Path, Body
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from ...core.database import db_manager
-from ...core.exceptions import APIError, TokenError
-from ...schemas.microsoft import (
+from core.database import db_manager
+from core.exceptions import APIError, TokenError
+from schemas.microsoft import (
     OutlookEmailListResponse, OutlookEmailResponse, OutlookFolderResponse,
     OneDriveFileListResponse, OneDriveFileResponse, OneDriveSearchResponse
 )
-from ...connectors.microsoft.oauth import get_auth_url, exchange_code_for_token
-from ...connectors.microsoft.graph_client import (
+from connectors.microsoft.oauth import get_auth_url, exchange_code_for_token
+from connectors.microsoft.graph_client import (
     fetch_outlook_emails, fetch_outlook_email, fetch_outlook_folders, send_outlook_email,
     fetch_onedrive_files, fetch_onedrive_file, download_onedrive_file, create_onedrive_file, 
     delete_onedrive_file, search_onedrive_files,
@@ -23,7 +23,7 @@ from ...connectors.microsoft.graph_client import (
     fetch_calendar_events, create_calendar_event, delete_calendar_event,
     fetch_user_profile, fetch_user_photo
 )
-from ...core.config import settings
+from core.config import settings
 
 router = APIRouter(prefix="/microsoft", tags=["Microsoft Services"])
 

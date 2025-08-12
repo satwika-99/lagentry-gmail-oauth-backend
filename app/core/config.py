@@ -28,6 +28,8 @@ class Settings(BaseSettings):
         default=[
             "http://localhost:3000",
             "http://127.0.0.1:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
             "http://localhost:8000",
             "http://127.0.0.1:8000",
             "http://127.0.0.1:8081",
@@ -114,6 +116,22 @@ class Settings(BaseSettings):
     )
     slack_bot_token: Optional[str] = Field(default=None, env="SLACK_BOT_TOKEN")
     
+    # Salesforce OAuth settings
+    salesforce_client_id: Optional[str] = Field(default=None, env="SALESFORCE_CLIENT_ID")
+    salesforce_client_secret: Optional[str] = Field(default=None, env="SALESFORCE_CLIENT_SECRET")
+    salesforce_redirect_uri: str = Field(
+        default="http://127.0.0.1:8083/api/v1/salesforce/callback",
+        env="SALESFORCE_REDIRECT_URI"
+    )
+    salesforce_scopes: List[str] = Field(
+        default=[
+            "api",
+            "refresh_token",
+            "offline_access"
+        ],
+        env="SALESFORCE_SCOPES"
+    )
+    
     # Security settings
     secret_key: str = Field(default="your-secret-key-here", env="SECRET_KEY")
     token_expiry_hours: int = Field(default=24, env="TOKEN_EXPIRY_HOURS")
@@ -183,4 +201,13 @@ def validate_notion_config() -> bool:
         raise ValueError("NOTION_CLIENT_ID is required")
     if not settings.notion_client_secret:
         raise ValueError("NOTION_CLIENT_SECRET is required")
+    return True
+
+
+def validate_salesforce_config() -> bool:
+    """Validate that Salesforce OAuth configuration is complete"""
+    if not settings.salesforce_client_id:
+        raise ValueError("SALESFORCE_CLIENT_ID is required")
+    if not settings.salesforce_client_secret:
+        raise ValueError("SALESFORCE_CLIENT_SECRET is required")
     return True 

@@ -7,12 +7,12 @@ from fastapi import APIRouter, HTTPException, Query, Path, Body
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from ...providers.slack.auth import slack_provider
-from ...core.database import db_manager
-from ...core.config import settings
-from ...core.exceptions import APIError, TokenError
-from ...providers.slack.channels import slack_channels_api
-from ...schemas.slack import (
+from providers.slack.auth import slack_provider
+from core.database import db_manager
+from core.config import settings
+from core.exceptions import APIError, TokenError
+from providers.slack.channels import slack_channels_api
+from schemas.slack import (
     ChannelListResponse, ChannelResponse, MessageListResponse, MessageResponse,
     FileListResponse, FileResponse, UserListResponse, UserResponse
 )

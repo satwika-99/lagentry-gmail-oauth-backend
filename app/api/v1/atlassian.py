@@ -7,11 +7,11 @@ from fastapi import APIRouter, Query, HTTPException, Depends
 from typing import Optional, List
 from datetime import datetime
 
-from ...core.config import settings
-from ...core.auth import validate_atlassian_config
-from ...providers.atlassian.auth import atlassian_oauth
-from ...services.connector_service import connector_service
-from ...schemas.atlassian import (
+from core.config import settings
+from core.auth import validate_atlassian_config
+from providers.atlassian.auth import atlassian_oauth
+from services.connector_service import connector_service
+from schemas.atlassian import (
     ProjectListResponse,
     IssueListResponse,
     IssueDetailResponse,

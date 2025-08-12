@@ -12,20 +12,20 @@ import uvicorn
 from core.config import settings
 from core.database import db_manager
 from core.auth import validate_google_config, validate_slack_config, validate_atlassian_config
-from core.config import validate_jira_config, validate_microsoft_config, validate_notion_config
-# from api.v1 import auth, google, microsoft, slack, atlassian, confluence, unified, notion
+from core.config import validate_jira_config, validate_microsoft_config, validate_notion_config, validate_salesforce_config
+from api.v1 import auth, google, microsoft, slack, atlassian, confluence, unified, notion, salesforce
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager"""
-    # Startup
-    print("🚀 Starting Lagentry OAuth Backend...")
+    # Startup (avoid non-ASCII to prevent Windows console encoding issues)
+    print("Starting Lagentry OAuth Backend...")
     
     # Initialize database
     try:
         db_manager.init_db()
-        print("✅ Database initialized successfully")
+        print("Database initialized successfully")
     except Exception as e:
         print(f"❌ Database initialization failed: {e}")
         raise
@@ -33,48 +33,54 @@ async def lifespan(app: FastAPI):
     # Validate configurations
     try:
         validate_google_config()
-        print("✅ Google OAuth configuration validated")
+        print("Google OAuth configuration validated")
     except Exception as e:
         print(f"⚠️  Google OAuth not configured: {e}")
     
     try:
         validate_slack_config()
-        print("✅ Slack OAuth configuration validated")
+        print("Slack OAuth configuration validated")
     except Exception as e:
         print(f"⚠️  Slack OAuth not configured: {e}")
     
     try:
         validate_atlassian_config()
-        print("✅ Atlassian OAuth configuration validated")
+        print("Atlassian OAuth configuration validated")
     except Exception as e:
         print(f"⚠️  Atlassian OAuth not configured: {e}")
     
     try:
         validate_jira_config()
-        print("✅ Jira configuration validated")
+        print("Jira configuration validated")
     except Exception as e:
         print(f"⚠️  Jira not configured: {e}")
     
     try:
         validate_microsoft_config()
-        print("✅ Microsoft OAuth configuration validated")
+        print("Microsoft OAuth configuration validated")
     except Exception as e:
         print(f"⚠️  Microsoft OAuth not configured: {e}")
     
     try:
         validate_notion_config()
-        print("✅ Notion OAuth configuration validated")
+        print("Notion OAuth configuration validated")
     except Exception as e:
         print(f"⚠️  Notion OAuth not configured: {e}")
     
-    print(f"🌐 Server will be available at: http://{settings.host}:{settings.port}")
-    print(f"📚 API Documentation: http://{settings.host}:{settings.port}/docs")
+    try:
+        validate_salesforce_config()
+        print("Salesforce OAuth configuration validated")
+    except Exception as e:
+        print(f"⚠️  Salesforce OAuth not configured: {e}")
+    
+    print(f"Server will be available at: http://{settings.host}:{settings.port}")
+    print(f"API Documentation: http://{settings.host}:{settings.port}/docs")
     print("=" * 50)
     
     yield
     
     # Shutdown
-    print("🛑 Shutting down Lagentry OAuth Backend...")
+    print("Shutting down Lagentry OAuth Backend...")
 
 
 # Create FastAPI app
@@ -95,14 +101,15 @@ app.add_middleware(
 )
 
 # Include API routers
-# app.include_router(auth.router, prefix="/api/v1")
-# app.include_router(google.router, prefix="/api/v1")
-# app.include_router(microsoft.router, prefix="/api/v1")
-# app.include_router(slack.router, prefix="/api/v1")
-# app.include_router(atlassian.router, prefix="/api/v1")
-# app.include_router(confluence.router, prefix="/api/v1")
-# app.include_router(unified.router, prefix="/api/v1")
-# app.include_router(notion.router, prefix="/api/v1")
+app.include_router(auth.router, prefix="/api/v1")
+app.include_router(google.router, prefix="/api/v1")
+app.include_router(microsoft.router, prefix="/api/v1")
+app.include_router(slack.router, prefix="/api/v1")
+app.include_router(atlassian.router, prefix="/api/v1")
+app.include_router(confluence.router, prefix="/api/v1")
+app.include_router(unified.router, prefix="/api/v1")
+app.include_router(notion.router, prefix="/api/v1")
+app.include_router(salesforce.router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -174,7 +181,7 @@ if __name__ == "__main__":
     
     # Run the server
     uvicorn.run(
-        "app.main:app",
+        "main:app",
         host=settings.host,
         port=settings.port,
         reload=settings.debug,

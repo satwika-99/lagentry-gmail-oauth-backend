@@ -3,7 +3,7 @@ import json
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 from .oauth import refresh_token
-from ...core.database import db_manager
+from core.database import db_manager
 
 GRAPH_API_BASE = "https://graph.microsoft.com/v1.0"
 

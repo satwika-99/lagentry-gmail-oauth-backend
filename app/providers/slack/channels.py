@@ -7,8 +7,8 @@ import httpx
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
-from ...core.database import db_manager
-from ...core.exceptions import APIError
+from core.database import db_manager
+from core.exceptions import APIError
 
 
 class SlackChannelsAPI:

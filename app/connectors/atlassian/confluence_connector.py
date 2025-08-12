@@ -7,10 +7,10 @@ import httpx
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
-from ...connectors.base import DataConnector
-from ...core.database import db_manager
-from ...core.exceptions import ConnectorError, TokenError
-from ...providers.atlassian.auth import atlassian_oauth
+from connectors.base import DataConnector
+from core.database import db_manager
+from core.exceptions import ConnectorError, TokenError
+from providers.atlassian.auth import atlassian_oauth
 
 
 class ConfluenceConnector(DataConnector):

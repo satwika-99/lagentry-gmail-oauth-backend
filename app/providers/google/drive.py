@@ -9,8 +9,8 @@ from datetime import datetime
 import json
 import base64
 
-from ...core.database import db_manager
-from ...core.exceptions import APIError, TokenError
+from core.database import db_manager
+from core.exceptions import APIError, TokenError
 
 
 class GoogleDriveAPI:

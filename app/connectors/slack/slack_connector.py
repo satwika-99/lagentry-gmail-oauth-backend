@@ -7,10 +7,10 @@ import httpx
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
-from ...connectors.base import CommunicationConnector
-from ...core.database import db_manager
-from ...core.exceptions import ConnectorError, TokenError
-from ...providers.slack.auth import slack_provider
+from connectors.base import CommunicationConnector
+from core.database import db_manager
+from core.exceptions import ConnectorError, TokenError
+from providers.slack.auth import slack_provider
 
 
 class SlackConnector(CommunicationConnector):

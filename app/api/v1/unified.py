@@ -7,9 +7,9 @@ from fastapi import APIRouter, HTTPException, Query, Path, Depends
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from ...services.oauth_service import oauth_service
-from ...services.connector_service import connector_service
-from ...core.exceptions import OAuthError, ConnectorError
+from services.oauth_service import oauth_service
+from services.connector_service import connector_service
+from core.exceptions import OAuthError, ConnectorError
 
 router = APIRouter(prefix="/unified", tags=["Unified API"])
 

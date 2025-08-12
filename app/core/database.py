@@ -78,10 +78,10 @@ class DatabaseManager:
                 ''')
                 
                 conn.commit()
-                print(f"✅ Database initialized at: {self.db_path}")
+                print(f"Database initialized at: {self.db_path}")
                 
         except Exception as e:
-            print(f"❌ Database initialization failed: {e}")
+            print(f"Database initialization failed: {e}")
             raise
     
     @contextmanager
@@ -119,7 +119,7 @@ class DatabaseManager:
                 return True
                 
         except Exception as e:
-            print(f"❌ Failed to store tokens: {e}")
+            print(f"Failed to store tokens: {e}")
             return False
     
     def get_valid_tokens(self, user_email: str, provider: str) -> Optional[Dict[str, Any]]:
@@ -138,7 +138,7 @@ class DatabaseManager:
                 return None
                 
         except Exception as e:
-            print(f"❌ Failed to get tokens: {e}")
+            print(f"Failed to get tokens: {e}")
             return None
     
     def refresh_tokens(self, user_email: str, provider: str, new_access_token: str, 
@@ -159,7 +159,7 @@ class DatabaseManager:
                 return True
                 
         except Exception as e:
-            print(f"❌ Failed to refresh tokens: {e}")
+            print(f"Failed to refresh tokens: {e}")
             return False
     
     def get_all_users(self, provider: Optional[str] = None) -> List[str]:
@@ -182,7 +182,7 @@ class DatabaseManager:
                 return [row['user_email'] for row in cursor.fetchall()]
                 
         except Exception as e:
-            print(f"❌ Failed to get users: {e}")
+            print(f"Failed to get users: {e}")
             return []
     
     def delete_user_tokens(self, user_email: str, provider: str) -> bool:
@@ -199,7 +199,7 @@ class DatabaseManager:
                 return True
                 
         except Exception as e:
-            print(f"❌ Failed to delete tokens: {e}")
+            print(f"Failed to delete tokens: {e}")
             return False
     
     def log_activity(self, user_email: str, provider: str, action: str, details: Optional[Dict] = None) -> bool:
@@ -218,7 +218,7 @@ class DatabaseManager:
                 return True
                 
         except Exception as e:
-            print(f"❌ Failed to log activity: {e}")
+            print(f"Failed to log activity: {e}")
             return False
 
 
