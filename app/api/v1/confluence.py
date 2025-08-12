@@ -6,10 +6,10 @@ Handles Confluence operations using the same Atlassian OAuth credentials
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List, Dict, Any
 
-from core.auth import validate_atlassian_config
-from providers.atlassian.auth import atlassian_oauth
-from services.connector_service import connector_service
-from schemas.atlassian import (
+from app.core.auth import validate_atlassian_config
+from app.providers.atlassian.auth import atlassian_oauth
+from app.services.connector_service import connector_service
+from app.schemas.atlassian import (
     SpaceListResponse,
     SpaceDetailResponse,
     PageListResponse,
@@ -19,6 +19,46 @@ from schemas.atlassian import (
 )
 
 router = APIRouter(prefix="/confluence", tags=["confluence"])
+
+
+@router.get("/")
+async def confluence_status():
+    """Get Confluence integration status"""
+    return {
+        "success": True,
+        "provider": "confluence",
+        "configured": bool(True),  # Uses Atlassian OAuth
+        "services": ["spaces", "pages", "content"],
+        "endpoints": [
+            "/auth/url",
+            "/auth/callback",
+            "/auth/validate",
+            "/auth/revoke",
+            "/spaces",
+            "/pages",
+            "/content"
+        ]
+    }
+
+
+@router.get("")
+async def confluence_status_no_slash():
+    """Get Confluence integration status (no trailing slash)"""
+    return {
+        "success": True,
+        "provider": "confluence",
+        "configured": bool(True),  # Uses Atlassian OAuth
+        "services": ["spaces", "pages", "content"],
+        "endpoints": [
+            "/auth/url",
+            "/auth/callback",
+            "/auth/validate",
+            "/auth/revoke",
+            "/spaces",
+            "/pages",
+            "/content"
+        ]
+    }
 
 
 @router.get("/auth/url")
@@ -31,7 +71,7 @@ async def get_confluence_auth_url(
         validate_atlassian_config()
         
         # Use Confluence-specific redirect URI
-        from core.config import settings
+        from app.core.config import settings
         from urllib.parse import urlencode
         
         client_id = settings.atlassian_client_id

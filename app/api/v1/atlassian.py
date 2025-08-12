@@ -7,11 +7,11 @@ from fastapi import APIRouter, Query, HTTPException, Depends
 from typing import Optional, List
 from datetime import datetime
 
-from core.config import settings
-from core.auth import validate_atlassian_config
-from providers.atlassian.auth import atlassian_oauth
-from services.connector_service import connector_service
-from schemas.atlassian import (
+from app.core.config import settings
+from app.core.auth import validate_atlassian_config
+from app.providers.atlassian.auth import atlassian_oauth
+from app.services.connector_service import connector_service
+from app.schemas.atlassian import (
     ProjectListResponse,
     IssueListResponse,
     IssueDetailResponse,
@@ -21,6 +21,46 @@ from schemas.atlassian import (
 )
 
 router = APIRouter(prefix="/atlassian", tags=["Atlassian"])
+
+
+@router.get("/")
+async def atlassian_status():
+    """Get Atlassian integration status"""
+    return {
+        "success": True,
+        "provider": "atlassian",
+        "configured": bool(settings.atlassian_client_id),
+        "services": ["jira", "confluence"],
+        "endpoints": [
+            "/auth/url",
+            "/auth/callback",
+            "/auth/validate",
+            "/auth/revoke",
+            "/jira/user",
+            "/jira/projects",
+            "/jira/issues"
+        ]
+    }
+
+
+@router.get("")
+async def atlassian_status_no_slash():
+    """Get Atlassian integration status (no trailing slash)"""
+    return {
+        "success": True,
+        "provider": "atlassian",
+        "configured": bool(settings.atlassian_client_id),
+        "services": ["jira", "confluence"],
+        "endpoints": [
+            "/auth/url",
+            "/auth/callback",
+            "/auth/validate",
+            "/auth/revoke",
+            "/jira/user",
+            "/jira/projects",
+            "/jira/issues"
+        ]
+    }
 
 
 @router.get("/auth/url")

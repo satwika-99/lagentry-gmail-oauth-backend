@@ -6,8 +6,8 @@ Handles Notion OAuth 2.0 authentication flow
 import os
 import httpx
 from urllib.parse import urlencode
-from core.config import settings
-from core.database import db_manager
+from app.core.config import settings
+from app.core.database import db_manager
 
 NOTION_AUTH_BASE = "https://api.notion.com/v1/oauth/authorize"
 NOTION_TOKEN_URL = "https://api.notion.com/v1/oauth/token"

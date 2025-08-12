@@ -7,14 +7,14 @@ from fastapi import APIRouter, HTTPException, Query, Path, Body
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from core.database import db_manager
-from core.exceptions import APIError, TokenError
-from schemas.microsoft import (
+from app.core.database import db_manager
+from app.core.exceptions import APIError, TokenError
+from app.schemas.microsoft import (
     OutlookEmailListResponse, OutlookEmailResponse, OutlookFolderResponse,
     OneDriveFileListResponse, OneDriveFileResponse, OneDriveSearchResponse
 )
-from connectors.microsoft.oauth import get_auth_url, exchange_code_for_token
-from connectors.microsoft.graph_client import (
+from app.connectors.microsoft.oauth import get_auth_url, exchange_code_for_token
+from app.connectors.microsoft.graph_client import (
     fetch_outlook_emails, fetch_outlook_email, fetch_outlook_folders, send_outlook_email,
     fetch_onedrive_files, fetch_onedrive_file, download_onedrive_file, create_onedrive_file, 
     delete_onedrive_file, search_onedrive_files,
@@ -23,9 +23,49 @@ from connectors.microsoft.graph_client import (
     fetch_calendar_events, create_calendar_event, delete_calendar_event,
     fetch_user_profile, fetch_user_photo
 )
-from core.config import settings
+from app.core.config import settings
 
 router = APIRouter(prefix="/microsoft", tags=["Microsoft Services"])
+
+
+@router.get("/")
+async def microsoft_status():
+    """Get Microsoft integration status"""
+    return {
+        "success": True,
+        "provider": "microsoft",
+        "configured": bool(settings.microsoft_client_id),
+        "services": ["outlook", "onedrive", "teams", "sharepoint", "calendar"],
+        "endpoints": [
+            "/auth-url",
+            "/callback",
+            "/outlook/emails",
+            "/outlook/folders",
+            "/onedrive/files",
+            "/teams/channels",
+            "/calendar/events"
+        ]
+    }
+
+
+@router.get("")
+async def microsoft_status_no_slash():
+    """Get Microsoft integration status (no trailing slash)"""
+    return {
+        "success": True,
+        "provider": "microsoft",
+        "configured": bool(settings.microsoft_client_id),
+        "services": ["outlook", "onedrive", "teams", "sharepoint", "calendar"],
+        "endpoints": [
+            "/auth-url",
+            "/callback",
+            "/outlook/emails",
+            "/outlook/folders",
+            "/onedrive/files",
+            "/teams/channels",
+            "/calendar/events"
+        ]
+    }
 
 
 @router.get("/auth-url")

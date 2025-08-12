@@ -7,19 +7,57 @@ from fastapi import APIRouter, HTTPException, Query, Path, Body
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from core.database import db_manager
-from core.exceptions import APIError, TokenError, AuthenticationException
-from schemas.notion import (
+from app.core.database import db_manager
+from app.core.exceptions import APIError, TokenError, AuthenticationException
+from app.schemas.notion import (
     NotionAuthUrlResponse, NotionCallbackResponse, NotionServiceStatus,
     NotionDatabaseListResponse, NotionDatabaseResponse,
     NotionPageListResponse, NotionPageResponse, NotionBlockListResponse,
     NotionUserResponse
 )
-from connectors.notion.oauth import get_auth_url, exchange_code_for_token
-from connectors.notion.api_client import NotionAPIClient
-from core.config import settings
+from app.connectors.notion.oauth import get_auth_url, exchange_code_for_token
+from app.connectors.notion.api_client import NotionAPIClient
+from app.core.config import settings
 
 router = APIRouter(prefix="/notion", tags=["Notion Services"])
+
+
+@router.get("/")
+async def notion_status():
+    """Get Notion integration status"""
+    return {
+        "success": True,
+        "provider": "notion",
+        "configured": bool(settings.notion_client_id),
+        "services": ["databases", "pages", "blocks", "users"],
+        "endpoints": [
+            "/auth-url",
+            "/callback",
+            "/databases",
+            "/pages",
+            "/blocks",
+            "/users"
+        ]
+    }
+
+
+@router.get("")
+async def notion_status_no_slash():
+    """Get Notion integration status (no trailing slash)"""
+    return {
+        "success": True,
+        "provider": "notion",
+        "configured": bool(settings.notion_client_id),
+        "services": ["databases", "pages", "blocks", "users"],
+        "endpoints": [
+            "/auth-url",
+            "/callback",
+            "/databases",
+            "/pages",
+            "/blocks",
+            "/users"
+        ]
+    }
 
 
 @router.get("/auth-url", response_model=NotionAuthUrlResponse)

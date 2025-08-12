@@ -6,9 +6,9 @@ Manages all connectors using the factory pattern
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
-from connectors import ConnectorFactory
-from core.database import db_manager
-from core.exceptions import ConnectorError, TokenError
+from app.connectors import ConnectorFactory
+from app.core.database import db_manager
+from app.core.exceptions import ConnectorError, TokenError
 
 
 class ConnectorService:

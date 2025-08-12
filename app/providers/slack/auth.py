@@ -8,10 +8,10 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 import json
 
-from core.auth import OAuthProvider
-from core.config import settings
-from core.database import db_manager
-from core.exceptions import OAuthError, TokenError
+from app.core.auth import OAuthProvider
+from app.core.config import settings
+from app.core.database import db_manager
+from app.core.exceptions import OAuthError, TokenError
 
 
 class SlackOAuthProvider(OAuthProvider):

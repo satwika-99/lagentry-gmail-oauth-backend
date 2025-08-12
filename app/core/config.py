@@ -32,8 +32,7 @@ class Settings(BaseSettings):
             "http://127.0.0.1:5173",
             "http://localhost:8000",
             "http://127.0.0.1:8000",
-            "http://127.0.0.1:8081",
-            "http://127.0.0.1:8083"
+            "http://127.0.0.1:54321"
         ],
         env="CORS_ORIGINS"
     )
@@ -42,7 +41,7 @@ class Settings(BaseSettings):
     google_client_id: Optional[str] = Field(default=None, env="GOOGLE_CLIENT_ID")
     google_client_secret: Optional[str] = Field(default=None, env="GOOGLE_CLIENT_SECRET")
     google_redirect_uri: str = Field(
-        default="http://127.0.0.1:8081/auth/google/callback",
+        default="http://127.0.0.1:54321/api/v1/google/auth/callback",
         env="GOOGLE_REDIRECT_URI"
     )
     google_scopes: List[str] = Field(
@@ -138,6 +137,9 @@ class Settings(BaseSettings):
     
     # Logging settings
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
+    
+    # Frontend settings
+    vite_backend_url: str = Field(default="http://127.0.0.1:8083", env="VITE_BACKEND_URL")
     
     class Config:
         env_file = ".env"

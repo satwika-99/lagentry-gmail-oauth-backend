@@ -6,8 +6,8 @@ Handles all Notion API operations (databases, pages, search, etc.)
 import httpx
 from typing import Dict, List, Any, Optional
 from datetime import datetime
-from core.database import db_manager
-from core.exceptions import ConnectorError, AuthenticationException
+from app.core.database import db_manager
+from app.core.exceptions import ConnectorError, AuthenticationException
 
 class NotionAPIClient:
     """Notion API client for database and page operations"""

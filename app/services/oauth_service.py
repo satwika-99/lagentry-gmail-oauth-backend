@@ -6,11 +6,11 @@ Handles authentication for all providers using the modular structure
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 
-from core.database import db_manager
-from core.exceptions import OAuthError, TokenError
-from providers.google.auth import google_provider
-from providers.slack.auth import slack_provider
-from providers.atlassian.auth import atlassian_oauth
+from app.core.database import db_manager
+from app.core.exceptions import OAuthError, TokenError
+from app.providers.google.auth import google_provider
+from app.providers.slack.auth import slack_provider
+from app.providers.atlassian.auth import atlassian_oauth
 
 
 class OAuthService:

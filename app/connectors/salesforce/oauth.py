@@ -7,9 +7,9 @@ from typing import Dict, Any, Optional, List
 from urllib.parse import urlencode
 import json
 
-from core.database import db_manager
-from core.exceptions import AuthenticationException, TokenError
-from core.config import settings
+from app.core.database import db_manager
+from app.core.exceptions import AuthenticationException, TokenError
+from app.core.config import settings
 
 
 def get_auth_url(user_email: str, scope: str = "api refresh_token") -> str:

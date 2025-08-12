@@ -7,19 +7,61 @@ from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from providers.google.auth import google_provider
-from providers.google.gmail import gmail_service
-from providers.google.drive import drive_api
-from providers.google.calendar import calendar_api
-from core.database import db_manager
-from core.exceptions import APIError, TokenError
-from schemas.google import (
+from app.providers.google.auth import google_provider
+from app.providers.google.gmail import gmail_service
+from app.providers.google.drive import drive_api
+from app.providers.google.calendar import calendar_api
+from app.core.database import db_manager
+from app.core.exceptions import APIError, TokenError
+from app.schemas.google import (
     EmailListResponse, EmailResponse, LabelResponse, ProfileResponse,
     DriveFileListResponse, DriveFileResponse, DriveSearchResponse,
     CalendarListResponse, EventListResponse, EventResponse, EventCreateRequest
 )
 
 router = APIRouter(prefix="/google", tags=["Google Services"])
+
+
+@router.get("/")
+async def google_status():
+    """Get Google integration status"""
+    return {
+        "success": True,
+        "provider": "google",
+        "configured": bool(google_provider.client_id),
+        "services": ["gmail", "drive", "calendar"],
+        "endpoints": [
+            "/auth/url",
+            "/auth/callback", 
+            "/auth/validate",
+            "/auth/revoke",
+            "/gmail/emails",
+            "/gmail/labels",
+            "/drive/files",
+            "/calendar/events"
+        ]
+    }
+
+
+@router.get("")
+async def google_status_no_slash():
+    """Get Google integration status (no trailing slash)"""
+    return {
+        "success": True,
+        "provider": "google",
+        "configured": bool(google_provider.client_id),
+        "services": ["gmail", "drive", "calendar"],
+        "endpoints": [
+            "/auth/url",
+            "/auth/callback", 
+            "/auth/validate",
+            "/auth/revoke",
+            "/gmail/emails",
+            "/gmail/labels",
+            "/drive/files",
+            "/calendar/events"
+        ]
+    }
 
 
 # OAuth Endpoints
@@ -70,27 +112,6 @@ async def revoke_google_tokens(user_email: str = Query(..., description="User em
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/status")
-async def google_status():
-    """Get Google integration status"""
-    return {
-        "success": True,
-        "provider": "google",
-        "configured": bool(google_provider.client_id),
-        "services": ["gmail", "drive", "calendar"],
-        "endpoints": [
-            "/auth/url",
-            "/auth/callback", 
-            "/auth/validate",
-            "/auth/revoke",
-            "/gmail/emails",
-            "/gmail/labels",
-            "/drive/files",
-            "/calendar/events"
-        ]
-    }
 
 
 # Gmail Endpoints

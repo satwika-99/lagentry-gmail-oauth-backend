@@ -6,9 +6,9 @@ import httpx
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
-from core.exceptions import GoogleAPIException, TokenExpiredException
-from core.utils import mask_token, create_error_response, create_success_response
-from core.database import db_manager
+from app.core.exceptions import GoogleAPIException, TokenExpiredException
+from app.core.utils import mask_token, create_error_response, create_success_response
+from app.core.database import db_manager
 
 
 class GmailAPI:

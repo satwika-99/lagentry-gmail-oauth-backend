@@ -7,10 +7,10 @@ import httpx
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
-from connectors.base import ProjectConnector
-from core.database import db_manager
-from core.exceptions import ConnectorError, TokenError
-from providers.atlassian.auth import atlassian_oauth
+from app.connectors.base import ProjectConnector
+from app.core.database import db_manager
+from app.core.exceptions import ConnectorError, TokenError
+from app.providers.atlassian.auth import atlassian_oauth
 
 
 class JiraConnector(ProjectConnector):

@@ -7,16 +7,56 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from fastapi.responses import RedirectResponse
 from typing import List, Dict, Any, Optional
 
-from core.auth import get_provider
-from core.database import db_manager
-from core.exceptions import OAuthCallbackException, InvalidProviderException
-from core.utils import create_success_response, create_error_response, validate_provider
-from schemas.auth import (
+from app.core.auth import get_provider
+from app.core.database import db_manager
+from app.core.exceptions import OAuthCallbackException, InvalidProviderException
+from app.core.utils import create_success_response, create_error_response, validate_provider
+from app.schemas.auth import (
     OAuthCallbackResponse, AuthUrlResponse, UserTokensResponse,
     TokenValidationResponse, RevokeTokenResponse, ProviderInfo
 )
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+@router.get("/")
+async def auth_status():
+    """Get authentication API status"""
+    return {
+        "success": True,
+        "provider": "auth",
+        "description": "Authentication API for all OAuth providers",
+        "supported_providers": ["google", "microsoft", "atlassian", "slack"],
+        "endpoints": [
+            "/{provider}",
+            "/{provider}/callback",
+            "/{provider}/refresh",
+            "/{provider}/validate",
+            "/{provider}/revoke",
+            "/tokens/{user_email}",
+            "/tokens/{user_email}/{provider}"
+        ]
+    }
+
+
+@router.get("")
+async def auth_status_no_slash():
+    """Get authentication API status (no trailing slash)"""
+    return {
+        "success": True,
+        "provider": "auth",
+        "description": "Authentication API for all OAuth providers",
+        "supported_providers": ["google", "microsoft", "atlassian", "slack"],
+        "endpoints": [
+            "/{provider}",
+            "/{provider}/callback",
+            "/{provider}/refresh",
+            "/{provider}/validate",
+            "/{provider}/revoke",
+            "/tokens/{user_email}",
+            "/tokens/{user_email}/{provider}"
+        ]
+    }
 
 
 @router.get("/{provider}", response_model=AuthUrlResponse)

@@ -7,11 +7,51 @@ from fastapi import APIRouter, HTTPException, Query, Path, Depends
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from services.oauth_service import oauth_service
-from services.connector_service import connector_service
-from core.exceptions import OAuthError, ConnectorError
+from app.services.oauth_service import oauth_service
+from app.services.connector_service import connector_service
+from app.core.exceptions import OAuthError, ConnectorError
 
 router = APIRouter(prefix="/unified", tags=["Unified API"])
+
+
+@router.get("/")
+async def unified_status():
+    """Get unified API status"""
+    return {
+        "success": True,
+        "provider": "unified",
+        "description": "Unified API for all OAuth providers",
+        "services": ["google", "slack", "atlassian", "microsoft", "notion", "salesforce"],
+        "endpoints": [
+            "/auth/{provider}/url",
+            "/auth/{provider}/callback",
+            "/auth/{provider}/validate",
+            "/auth/{provider}/refresh",
+            "/auth/{provider}/revoke",
+            "/auth/status",
+            "/connectors/{provider}/status"
+        ]
+    }
+
+
+@router.get("")
+async def unified_status_no_slash():
+    """Get unified API status (no trailing slash)"""
+    return {
+        "success": True,
+        "provider": "unified",
+        "description": "Unified API for all OAuth providers",
+        "services": ["google", "slack", "atlassian", "microsoft", "notion", "salesforce"],
+        "endpoints": [
+            "/auth/{provider}/url",
+            "/auth/{provider}/callback",
+            "/auth/{provider}/validate",
+            "/auth/{provider}/refresh",
+            "/auth/{provider}/revoke",
+            "/auth/status",
+            "/connectors/{provider}/status"
+        ]
+    }
 
 
 # OAuth Endpoints

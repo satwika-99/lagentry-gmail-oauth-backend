@@ -6,9 +6,9 @@ import httpx
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
-from core.database import db_manager
-from core.exceptions import AuthenticationException, APIError
-from connectors.salesforce.oauth import refresh_access_token
+from app.core.database import db_manager
+from app.core.exceptions import AuthenticationException, APIError
+from app.connectors.salesforce.oauth import refresh_access_token
 
 
 class SalesforceAPIClient:

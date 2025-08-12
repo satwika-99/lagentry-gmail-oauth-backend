@@ -9,11 +9,11 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import uvicorn
 
-from core.config import settings
-from core.database import db_manager
-from core.auth import validate_google_config, validate_slack_config, validate_atlassian_config
-from core.config import validate_jira_config, validate_microsoft_config, validate_notion_config, validate_salesforce_config
-from api.v1 import auth, google, microsoft, slack, atlassian, confluence, unified, notion, salesforce
+from app.core.config import settings
+from app.core.database import db_manager
+from app.core.auth import validate_google_config, validate_slack_config, validate_atlassian_config
+from app.core.config import validate_jira_config, validate_microsoft_config, validate_notion_config, validate_salesforce_config
+from app.api.v1 import auth, google, microsoft, slack, atlassian, confluence, unified, notion, salesforce
 
 
 @asynccontextmanager
@@ -145,7 +145,7 @@ async def health_check():
 async def get_emails(user_email: str, max_results: int = 10):
     """Legacy endpoint for backward compatibility"""
     try:
-        from providers.google.gmail import gmail_service
+        from app.providers.google.gmail import gmail_service
         result = await gmail_service.get_user_emails(user_email, max_results)
         return result
     except Exception as e:

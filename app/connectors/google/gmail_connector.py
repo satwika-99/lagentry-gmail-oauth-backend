@@ -7,10 +7,10 @@ import httpx
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
-from connectors.base import DataConnector
-from core.database import db_manager
-from core.exceptions import ConnectorError, TokenError
-from providers.google.auth import google_provider
+from app.connectors.base import DataConnector
+from app.core.database import db_manager
+from app.core.exceptions import ConnectorError, TokenError
+from app.providers.google.auth import google_provider
 
 
 class GmailConnector(DataConnector):

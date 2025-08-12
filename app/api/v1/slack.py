@@ -7,17 +7,59 @@ from fastapi import APIRouter, HTTPException, Query, Path, Body
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from providers.slack.auth import slack_provider
-from core.database import db_manager
-from core.config import settings
-from core.exceptions import APIError, TokenError
-from providers.slack.channels import slack_channels_api
-from schemas.slack import (
+from app.providers.slack.auth import slack_provider
+from app.core.database import db_manager
+from app.core.config import settings
+from app.core.exceptions import APIError, TokenError
+from app.providers.slack.channels import slack_channels_api
+from app.schemas.slack import (
     ChannelListResponse, ChannelResponse, MessageListResponse, MessageResponse,
     FileListResponse, FileResponse, UserListResponse, UserResponse
 )
 
 router = APIRouter(prefix="/slack", tags=["Slack Services"])
+
+
+@router.get("/")
+async def slack_status():
+    """Get Slack integration status"""
+    return {
+        "success": True,
+        "provider": "slack",
+        "configured": bool(settings.slack_client_id),
+        "services": ["channels", "messages", "files", "users"],
+        "endpoints": [
+            "/auth/url",
+            "/auth/callback",
+            "/auth/validate",
+            "/auth/revoke",
+            "/channels",
+            "/messages",
+            "/files",
+            "/users"
+        ]
+    }
+
+
+@router.get("")
+async def slack_status_no_slash():
+    """Get Slack integration status (no trailing slash)"""
+    return {
+        "success": True,
+        "provider": "slack",
+        "configured": bool(settings.slack_client_id),
+        "services": ["channels", "messages", "files", "users"],
+        "endpoints": [
+            "/auth/url",
+            "/auth/callback",
+            "/auth/validate",
+            "/auth/revoke",
+            "/channels",
+            "/messages",
+            "/files",
+            "/users"
+        ]
+    }
 
 
 # OAuth Endpoints

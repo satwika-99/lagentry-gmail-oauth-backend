@@ -7,19 +7,59 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 import httpx
 
-from core.database import db_manager
-from core.exceptions import APIError, TokenError, AuthenticationException
-from schemas.salesforce import (
+from app.core.database import db_manager
+from app.core.exceptions import APIError, TokenError, AuthenticationException
+from app.schemas.salesforce import (
     SalesforceAuthUrlResponse, SalesforceCallbackResponse, SalesforceServiceStatus,
     SalesforceTokenValidationResponse, SalesforceScopeResponse, SalesforceUserResponse,
     SalesforceAccountListResponse, SalesforceContactListResponse, SalesforceLeadListResponse,
     SalesforceOpportunityListResponse, SalesforceCaseListResponse
 )
-from connectors.salesforce.oauth import get_auth_url, exchange_code_for_token, validate_token, get_user_info
-from connectors.salesforce.api_client import SalesforceAPIClient
-from core.config import settings
+from app.connectors.salesforce.oauth import get_auth_url, exchange_code_for_token, validate_token, get_user_info
+from app.connectors.salesforce.api_client import SalesforceAPIClient
+from app.core.config import settings
 
 router = APIRouter(prefix="/salesforce", tags=["Salesforce Services"])
+
+
+@router.get("/")
+async def salesforce_status():
+    """Get Salesforce integration status"""
+    return {
+        "success": True,
+        "provider": "salesforce",
+        "configured": bool(settings.salesforce_client_id),
+        "services": ["accounts", "contacts", "leads", "opportunities", "cases"],
+        "endpoints": [
+            "/auth-url",
+            "/callback",
+            "/validate-token",
+            "/scopes",
+            "/accounts",
+            "/contacts",
+            "/leads"
+        ]
+    }
+
+
+@router.get("")
+async def salesforce_status_no_slash():
+    """Get Salesforce integration status (no trailing slash)"""
+    return {
+        "success": True,
+        "provider": "salesforce",
+        "configured": bool(settings.salesforce_client_id),
+        "services": ["accounts", "contacts", "leads", "opportunities", "cases"],
+        "endpoints": [
+            "/auth-url",
+            "/callback",
+            "/validate-token",
+            "/scopes",
+            "/accounts",
+            "/contacts",
+            "/leads"
+        ]
+    }
 
 
 @router.get("/auth-url", response_model=SalesforceAuthUrlResponse)

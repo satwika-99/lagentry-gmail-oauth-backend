@@ -1,8 +1,8 @@
 import os
 import httpx
 from urllib.parse import urlencode
-from core.config import settings
-from core.database import db_manager
+from app.core.config import settings
+from app.core.database import db_manager
 
 MICROSOFT_AUTH_BASE = "https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/authorize"
 MICROSOFT_TOKEN_URL = "https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
